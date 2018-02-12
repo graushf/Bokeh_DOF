@@ -16,6 +16,10 @@ var lastFrame = 0.0;    // Time of last frame
 var lightPos = vec3.fromValues(10.0, 0.0, 0.0);
 var lightPointPos = vec3.fromValues(10.0, 10.0, 15.0);
 
+// Framebuffers
+var backBuffer;
+var textureBackBuffer;
+
 function initGL(canvas) 
 {
     try {
@@ -39,10 +43,11 @@ function computeDeltaTime() {
 function tick() 
 {
     requestAnimFrame(tick);
-    gl.clearColor(0.0, 0.0, 0.0, 1.0);
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    //gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    //gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    drawScene(shaderProgramBasic);
+    //drawScene(shaderProgramBasic);
+    drawEffectPass();
 
     handleKeys();
     computeDeltaTime();
@@ -67,6 +72,7 @@ function webGLStart()
 {
     var canvas = document.getElementById("WebGLCanvas");
     initGL(canvas);
+    createFramebuffers();
 
     initCamera();
     setupScene();

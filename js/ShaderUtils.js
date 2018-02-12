@@ -1,6 +1,7 @@
 var shaderProgramBasic;
 var shaderProgramPhongLightingPass;
-var shaderProgramScreenFillPass;
+var shaderProgramBackgroundPass;
+var shaderProgramScreenFillPass2;
 
 function getShader(gl, id) 
 {
@@ -43,6 +44,7 @@ function setupShadersScene()
 	initShaderBasic();
 	initShaderPhongLightingPass();
 	initShaderScreenFillPass();
+	shaderProgramScreenFillPass2();
 }
 
 function initShaderBasic() 
@@ -77,15 +79,30 @@ function initShaderPhongLightingPass()
 
 function initShaderScreenFillPass()
 {
-	var fragmentShader = getShader(gl, "screenFillPass-fs");
-	var vertexShader = getShader(gl, "screenFillPass-vs");
+	var fragmentShader = getShader(gl, "drawBackgroundPass-fs");
+	var vertexShader = getShader(gl, "drawBackgroundPass-vs");
 
-	shaderProgramScreenFillPass = gl.createProgram();
-	gl.attachShader(shaderProgramScreenFillPass, vertexShader);
-	gl.attachShader(shaderProgramScreenFillPass, fragmentShader);
-	gl.linkProgram(shaderProgramScreenFillPass);
+	shaderProgramBackgroundPass = gl.createProgram();
+	gl.attachShader(shaderProgramBackgroundPass, vertexShader);
+	gl.attachShader(shaderProgramBackgroundPass, fragmentShader);
+	gl.linkProgram(shaderProgramBackgroundPass);
 
-	if (!gl.getProgramParameter(shaderProgramScreenFillPass, gl.LINK_STATUS)) {
+	if (!gl.getProgramParameter(shaderProgramBackgroundPass, gl.LINK_STATUS)) {
+		alert("Could not initialise shaders");
+	}
+}
+
+function shaderProgramScreenFillPass2()
+{
+	var fragmentShader = getShader(gl, "screenFillPass2-fs");
+	var vertexShader = getShader(gl, "screenFillPass2-vs");
+
+	shaderProgramScreenFillPass2 = gl.createProgram();
+	gl.attachShader(shaderProgramScreenFillPass2, vertexShader);
+	gl.attachShader(shaderProgramScreenFillPass2, fragmentShader);
+	gl.linkProgram(shaderProgramScreenFillPass2);
+
+	if (!gl.getProgramParameter(shaderProgramScreenFillPass2, gl.LINK_STATUS)) {
 		alert("Could not initialise shaders");
 	}
 }

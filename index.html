@@ -13,6 +13,7 @@
         <script type="text/javascript" src="js/Eventhandler.js"></script>
         <script type="text/javascript" src="js/K3D.js"></script>
         <script type="text/javascript" src="js/texture.js"></script>
+        <script type="text/javascript" src="js/Framebuffers.js"></script>
 
         <script id="phongLightingPass-fs" type="x-shader/x-fragment">
             precision mediump float;
@@ -21,7 +22,7 @@
             varying vec3 vNormal;
             varying vec2 vTextureCoord;
 
-            uniform vec3 staticColor;
+            uniform vec3 uStaticColor;
 
             uniform vec3 lightPos;
             uniform vec3 viewPos;
@@ -69,7 +70,7 @@
 
             void main()
             {   
-                vec3 result = staticColor;
+                vec3 result = uStaticColor;
                 //gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0); return;
                 if (uDisableLighting == 0)
                 {
@@ -201,7 +202,7 @@
             }
         </script>
 
-        <script id="screenFillPass-fs" type="x-shader/x-fragment">
+        <script id="drawBackgroundPass-fs" type="x-shader/x-fragment">
             precision mediump float;
 
             uniform vec3 uStaticColor;
@@ -276,7 +277,7 @@
             }
         </script>
 
-        <script id="screenFillPass-vs" type="x-shader/x-vertex">
+        <script id="drawBackgroundPass-vs" type="x-shader/x-vertex">
             attribute vec3 aVertexPosition;
             attribute vec2 aTextureCoord;
             
@@ -287,6 +288,36 @@
                 gl_Position = vec4(aVertexPosition, 1.0);
             }
         </script>
+
+        <script id="screenFillPass2-fs" type="x-shader/x-fragment">
+            precision mediump float;
+
+            uniform sampler2D uSampler;
+
+            uniform vec3 uStaticColor;
+            varying vec2 vTextureCoord;
+
+            void main(void) {
+                vec4 color;
+
+                color = texture2D(uSampler, vTextureCoord);
+                //color = vec4(vTextureCoord, 0.0, 1.0);
+                gl_FragColor = vec4(color.xyz, 1.0);
+            }
+        </script>
+
+        <script id="screenFillPass2-vs" type="x-shader/x-vertex">
+            attribute vec3 aVertexPosition;
+            attribute vec2 aTextureCoord;
+
+            varying vec2 vTextureCoord;
+
+            void main(void) {
+                vTextureCoord = aTextureCoord;
+                gl_Position = vec4(aVertexPosition, 1.0);
+            }
+        </script>
+
     </head>
 
     <body onload="webGLStart();">
@@ -294,5 +325,8 @@
             <canvas id="WebGLCanvas" style="border: none;" width="1280" height="720">No canvas support</canvas>
             <div id="overlay">
             </div>
+        </div>
+        <div>
+            <h1>adios</h1>
         </div>
     </body>
