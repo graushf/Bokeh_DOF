@@ -2,6 +2,7 @@ var shaderProgramBasic;
 var shaderProgramPhongLightingPass;
 var shaderProgramBackgroundPass;
 var shaderProgramScreenFillPass2;
+var shaderProgramScenePass;
 
 function getShader(gl, id) 
 {
@@ -45,6 +46,8 @@ function setupShadersScene()
 	initShaderPhongLightingPass();
 	initShaderBackgroundPass();
 	initShadersScreenFillingTexturePass();
+	initShadersScenePass();
+	initShadersDownsamplePass();
 }
 
 function initShaderBasic() 
@@ -102,6 +105,34 @@ function initShadersScreenFillingTexturePass() {
     gl.linkProgram(shaderProgramScrFillTexturePass);
 
     if (!gl.getProgramParameter(shaderProgramScrFillTexturePass, gl.LINK_STATUS)) {
+        alert("Could not initialise shaders");
+    }
+}
+
+function initShadersScenePass() {
+	var fragmentShader = getShader(gl, "scenePass-fs");
+    var vertexShader = getShader(gl, "screenFillingTexture-vs");
+
+    shaderProgramScenePass = gl.createProgram();
+    gl.attachShader(shaderProgramScenePass, vertexShader);
+    gl.attachShader(shaderProgramScenePass, fragmentShader);
+    gl.linkProgram(shaderProgramScenePass);
+
+    if (!gl.getProgramParameter(shaderProgramScenePass, gl.LINK_STATUS)) {
+        alert("Could not initialise shaders");
+    }
+}
+
+function initShadersDownsamplePass() {
+	var fragmentShader = getShader(gl, "downsamplePass-fs");
+    var vertexShader = getShader(gl, "screenFillingTexture-vs");
+
+    shaderProgramDownsamplePass = gl.createProgram();
+    gl.attachShader(shaderProgramDownsamplePass, vertexShader);
+    gl.attachShader(shaderProgramDownsamplePass, fragmentShader);
+    gl.linkProgram(shaderProgramDownsamplePass);
+
+    if (!gl.getProgramParameter(shaderProgramDownsamplePass, gl.LINK_STATUS)) {
         alert("Could not initialise shaders");
     }
 }

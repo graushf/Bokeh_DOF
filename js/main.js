@@ -16,9 +16,18 @@ var lastFrame = 0.0;    // Time of last frame
 var lightPos = vec3.fromValues(10.0, 0.0, 0.0);
 var lightPointPos = vec3.fromValues(10.0, 10.0, 15.0);
 
+// Downsampling for Bokeh effect
+var downsampleCoefficient = 2.0
+var invViewDimensions_x;
+var invViewDimensions_y;
+
 // Framebuffers
 var backBuffer;
 var textureBackBuffer;
+var sceneBuffer;
+var textureSceneBuffer;
+var backBufferHalf;
+var textureBackBufferHalf;
 
 // CoC
 var CoC = 1.0;
@@ -30,6 +39,9 @@ function initGL(canvas)
         gl = canvas.getContext("experimental-webgl");
         gl.viewportWidth = canvas.width;
         gl.viewportHeight = canvas.height;
+
+        invViewDimensions_x = (1.0/gl.viewportWidth)*1.0;
+        invViewDimensions_y = (1.0/gl.viewportHeight)*1.0;
     } catch (e) {
     }
     if (!gl) {

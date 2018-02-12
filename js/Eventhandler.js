@@ -1,7 +1,6 @@
 var currentlyPressedKeys = {};
 
 function handleKeyDown(event) {
-    console.log(event.keyCode);
     currentlyPressedKeys[event.keyCode] = true;
 }
 

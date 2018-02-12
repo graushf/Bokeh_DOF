@@ -296,6 +296,72 @@
             }
         </script>
 
+        <script id="scenePass-fs" type="x-shader/x-fragment">
+            precision mediump float;
+
+            uniform sampler2D uSampler;
+
+            uniform float uCoc;
+            varying vec2 vUv;
+
+            void main(void) {
+                vec3 scene = texture2D(uSampler, vUv).rgb;
+                //scene *= dot(vec3(0.3, 0.59, 0.11), scene);
+                //scene *= scene;
+                //scene *= 500.0;
+
+                gl_FragColor = vec4(scene, uCoc * uCoc);
+                //gl_FragColor = vec4(scene, 1.0);
+            }
+        </script>
+
+        <script id="downsamplePass-fs" type="x-shader/x-fragment">
+            precision mediump float;
+
+            #define PI 3.1415926535897932384626433832795
+            
+            uniform sampler2D uSampler;
+            uniform vec2 uInvViewDimensions;
+
+            varying vec2 vUv;
+
+            void main(void) {
+                //gl_FragColor = texture2D(uSampler, vUv); return;
+                // Downsample the image taking into account the blurrines of each pixel.
+                
+                // Sample the CoC
+                vec4 coc;
+                coc.x = texture2D(uSampler, vUv).w;
+                coc.y = texture2D(uSampler, vUv + vec2(uInvViewDimensions.x, 0.0)).w;
+                coc.z = texture2D(uSampler, vUv + vec2(0.0, uInvViewDimensions.y)).w;
+                coc.w = texture2D(uSampler, vUv + vec2(uInvViewDimensions.x, uInvViewDimensions.y)).w;
+
+                // Sample the Scene
+                vec3 colorA, colorB, colorC, colorD;
+                colorA = texture2D(uSampler, vUv).xyz;
+                colorB = texture2D(uSampler, vUv + vec2(uInvViewDimensions.x, 0.0)).xyz;
+                colorC = texture2D(uSampler, vUv + vec2(0.0, uInvViewDimensions.y)).xyz;
+                colorD = texture2D(uSampler, vUv + vec2(uInvViewDimensions.x, uInvViewDimensions.y)).xyz;
+                
+                float blurAmount = dot(coc, vec4(1.0));
+
+                vec3 colorTotal;
+                colorTotal = colorA * coc.x;
+                colorTotal += colorB * coc.y;
+                colorTotal += colorC * coc.z;
+                colorTotal += colorD * coc.w;
+
+                colorTotal /= blurAmount;
+
+                //gl_FragColor = vec4(texture2D(uSampler, vUv).w, 0.0, 0.0, 1.0); return;
+                //gl_FragColor = vec4(texture2D(uSampler, vUv).xyz, 1.0); return;
+
+                gl_FragColor = vec4(colorTotal/4.0, clamp(blurAmount/4.0, 0.0, 1.0) * (PI/2.0));
+                    
+                gl_FragColor = vec4(texture2D(uSampler, vUv).xyz, clamp(blurAmount/4.0, 0.0, 1.0) * (PI/2.0));
+            }
+        </script>
+
         <script id="screenFillingTexture-fs" type="x-shader/x-fragment">
             precision mediump float;
 
