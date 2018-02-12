@@ -2,6 +2,8 @@
     <head>
         <title>Bokeh_DOF</title>
         <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+
+        <link rel="stylesheet" href="css/styles.css" type="text/css">
         <script type="text/javascript" src="js/webgl-utils.js"></script>
 	    <script type="text/javascript" src="js/gl-matrix-test.js"></script>
         <script type="text/javascript" src="js/main.js"></script>
@@ -14,6 +16,7 @@
         <script type="text/javascript" src="js/K3D.js"></script>
         <script type="text/javascript" src="js/texture.js"></script>
         <script type="text/javascript" src="js/Framebuffers.js"></script>
+        <script type="text/javascript" src="js/StatsInformation.js"></script>
 
         <script id="phongLightingPass-fs" type="x-shader/x-fragment">
             precision mediump float;
@@ -84,6 +87,10 @@
                     //    result += CalcPointLights(pointsLights[i], norm, vFragPos, viewDir);
                     //}
                 }
+
+                //result = result * dot(vec3(0.3, 0.59, 0.11), result);
+                //result = result * result;
+                //result =  result * 1500.0;
 
                 gl_FragColor = vec4(result, 1.0);
             }
@@ -289,31 +296,28 @@
             }
         </script>
 
-        <script id="screenFillPass2-fs" type="x-shader/x-fragment">
+        <script id="screenFillingTexture-fs" type="x-shader/x-fragment">
             precision mediump float;
 
             uniform sampler2D uSampler;
 
-            uniform vec3 uStaticColor;
-            varying vec2 vTextureCoord;
+            uniform float uCoc;
+        
+            varying vec2 vUv;
 
             void main(void) {
-                vec4 color;
-
-                color = texture2D(uSampler, vTextureCoord);
-                //color = vec4(vTextureCoord, 0.0, 1.0);
-                gl_FragColor = vec4(color.xyz, 1.0);
+                gl_FragColor = vec4(texture2D(uSampler, vUv).rgb, 1.0);
             }
         </script>
 
-        <script id="screenFillPass2-vs" type="x-shader/x-vertex">
+        <script id="screenFillingTexture-vs" type="x-shader/x-vertex">
             attribute vec3 aVertexPosition;
             attribute vec2 aTextureCoord;
 
-            varying vec2 vTextureCoord;
+            varying vec2 vUv;
 
             void main(void) {
-                vTextureCoord = aTextureCoord;
+                vUv = aTextureCoord;
                 gl_Position = vec4(aVertexPosition, 1.0);
             }
         </script>
@@ -324,6 +328,8 @@
         <div class="container">
             <canvas id="WebGLCanvas" style="border: none;" width="1280" height="720">No canvas support</canvas>
             <div id="overlay">
+                <div>CoC (Q/A): <span id="CoCId"></span></div>
+                <div>Angle (W/S): <span id="AngleId"></span></div>
             </div>
         </div>
         <div>

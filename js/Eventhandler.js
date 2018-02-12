@@ -1,6 +1,7 @@
 var currentlyPressedKeys = {};
 
 function handleKeyDown(event) {
+    console.log(event.keyCode);
     currentlyPressedKeys[event.keyCode] = true;
 }
 
@@ -28,6 +29,27 @@ function handleKeys() {
     if (currentlyPressedKeys[27]) {
         enableMouse = !enableMouse;
     }
+    if (currentlyPressedKeys[82]) {
+		if (CoC < 1.0) {
+			CoC += 0.01;
+		}
+	}
+	if (currentlyPressedKeys[70]) {
+		if (CoC > 0.01) {
+			CoC -= 0.01;
+		}
+	}
+
+	if (currentlyPressedKeys[84]) {
+		if (Angle < 6.2800) {
+			Angle += 0.01;
+		}
+	}
+	if (currentlyPressedKeys[71]) {
+		if (Angle > 0.05) {
+			Angle -= 0.01;
+		}
+	}
 }
 
 var xoffset;

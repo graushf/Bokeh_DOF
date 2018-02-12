@@ -20,6 +20,10 @@ var lightPointPos = vec3.fromValues(10.0, 10.0, 15.0);
 var backBuffer;
 var textureBackBuffer;
 
+// CoC
+var CoC = 1.0;
+var Angle = 0.0;
+
 function initGL(canvas) 
 {
     try {
@@ -50,6 +54,7 @@ function tick()
     drawEffectPass();
 
     handleKeys();
+    handleStatistics();
     computeDeltaTime();
 }
 
@@ -89,6 +94,7 @@ function webGLStart()
     document.onmousemove = handleMouseMove;
     document.onmousedown = handleMouseDown;
     document.onmouseup = handleMouseUp;
-
+    
+    initStatistics();
     tick();
 }

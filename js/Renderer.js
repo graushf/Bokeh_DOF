@@ -9,10 +9,32 @@ function drawEffectPass() {
 
     drawScene();
 
+
+    // gl.bindFramebuffer(gl.FRAMEBUFFER, backBufferHalf);
+    // gl.viewport(0, 0, gl.viewportWidth/downsampleCoefficient, gl.viewportHeight/downsampleCoefficient);
+
+    // renderDownsamplePass();
+
+    // gl.bindFramebuffer(gl.FRAMEBUFFER, MRTfbData.f);
+
+    // var bufferList = [
+    //     ext3.COLOR_ATTACHMENT0_WEBGL,
+    //     ext3.COLOR_ATTACHMENT1_WEBGL
+    // ];
+    // ext3.drawBuffersWEBGL(bufferList);
+
+    // drawVerticalAndDiagonalBlurPass();
+
+    // gl.bindFramebuffer(gl.FRAMEBUFFER, rhombiBlurBuffer);
+    // gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+
+    // drawRhombiBlurPassOptimized();
+
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
     //drawScreenTexture();
-    drawScreenFillingGeometry(shaderProgramScreenFillPass2);
+    //drawScreenFillingGeometry(shaderProgramScrFillTexturePass);
+    renderScrFillTexture(textureBackBuffer);
 }
 
 function drawScene(programToDraw)
@@ -40,7 +62,8 @@ function drawSceneObjects() {
 }
 
 function drawHexProducingSpheres() {
-    drawSphereDiffuseIntense(shaderProgramPhongLightingPass, vec3.fromValues(0.0, 2.5, -10.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(1.0, 0.0, 0.0));
+    var color = vec3.fromValues( 0.0, 10000000000 * 1.0, 0.0);
+    drawSphereDiffuseIntense(shaderProgramPhongLightingPass, vec3.fromValues(0.0, 2.5, -10.0), vec3.fromValues(0.25, 0.25, 0.25), color);
     drawSphereDiffuseIntense(shaderProgramPhongLightingPass, vec3.fromValues(4.0, 1.7, -10.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(1.0, 0.0, 0.0));
     drawSphereDiffuseIntense(shaderProgramPhongLightingPass, vec3.fromValues(-4.0, 1.0, -10.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(1.0, 0.0, 0.0));
     drawSphereDiffuseIntense(shaderProgramPhongLightingPass, vec3.fromValues(-4.3, 0.7, -10.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(1.0, 0.0, 0.0));
@@ -981,7 +1004,7 @@ function drawScreenFillingGeometry(programShading) {
         gl.uniform3f(programShading.lightUniform, lightPos[0], lightPos[1], lightPos[2]);
     }
 
-    if (programShading == shaderProgramScreenFillPass2) {
+    if (programShading == shaderProgramScrFillTexturePass) {
         gl.uniform3f(programShading.staticColorUniform, 0.0, 1.0, 0.0);
 
         programShading.uSamplerUniform = gl.getUniformLocation(programShading, "uSampler");
@@ -1002,6 +1025,31 @@ function drawScreenFillingGeometry(programShading) {
     gl.drawElements(gl.TRIANGLES, screenFillingIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 
     gl.enable(gl.DEPTH_TEST);
+}
+
+function renderScrFillTexture(texture) {
+    gl.useProgram(shaderProgramScrFillTexturePass);
+
+    shaderProgramScrFillTexturePass.vertexPositionAttribute = gl.getAttribLocation(shaderProgramScrFillTexturePass, "aVertexPosition");
+    gl.enableVertexAttribArray(shaderProgramScrFillTexturePass.vertexPositionAttribute);
+
+    shaderProgramScrFillTexturePass.textureCoordAttribute = gl.getAttribLocation(shaderProgramScrFillTexturePass, "aTextureCoord");
+    gl.enableVertexAttribArray(shaderProgramScrFillTexturePass.textureCoordAttribute);
+
+    shaderProgramScrFillTexturePass.samplerUniform = gl.getUniformLocation(shaderProgramScrFillTexturePass, "uSampler");
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, screenFillingVertexPositionBuffer);
+    gl.vertexAttribPointer(shaderProgramScrFillTexturePass.vertexPositionAttribute, screenFillingVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, screenFillingTextureCoordBuffer);
+    gl.vertexAttribPointer(shaderProgramScrFillTexturePass.textureCoordAttribute, screenFillingTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.uniform1i(shaderProgramScrFillTexturePass.samplerUniform, 0);
+
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, screenFillingIndexBuffer);
+    gl.drawElements(gl.TRIANGLES, screenFillingIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 }
 
 function transformGeometry( transformVec, scaleVec) 
