@@ -19,20 +19,15 @@ function drawEffectPass() {
     gl.viewport(0, 0, gl.viewportWidth/downsampleCoefficient, gl.viewportHeight/downsampleCoefficient);
     renderDownsamplePass();
 
-    // gl.bindFramebuffer(gl.FRAMEBUFFER, backBufferHalf);
-    // gl.viewport(0, 0, gl.viewportWidth/downsampleCoefficient, gl.viewportHeight/downsampleCoefficient);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, MRTfbData.f);
 
-    // renderDownsamplePass();
+    var bufferList = [
+        ext3.COLOR_ATTACHMENT0_WEBGL,
+        ext3.COLOR_ATTACHMENT1_WEBGL
+    ];
+    ext3.drawBuffersWEBGL(bufferList);
 
-    // gl.bindFramebuffer(gl.FRAMEBUFFER, MRTfbData.f);
-
-    // var bufferList = [
-    //     ext3.COLOR_ATTACHMENT0_WEBGL,
-    //     ext3.COLOR_ATTACHMENT1_WEBGL
-    // ];
-    // ext3.drawBuffersWEBGL(bufferList);
-
-    // drawVerticalAndDiagonalBlurPass();
+    drawVerticalAndDiagonalBlurPass();
 
     // gl.bindFramebuffer(gl.FRAMEBUFFER, rhombiBlurBuffer);
     // gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
@@ -1099,7 +1094,7 @@ function renderScenePass() {
 function renderDownsamplePass() {
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    
+
     gl.useProgram(shaderProgramDownsamplePass);
 
     shaderProgramDownsamplePass.vertexPositionAttribute = gl.getAttribLocation(shaderProgramDownsamplePass, "aVertexPosition");
@@ -1126,6 +1121,41 @@ function renderDownsamplePass() {
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, textureBackBuffer);
     gl.uniform1i(shaderProgramDownsamplePass.samplerUniform, 0);
+
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, screenFillingIndexBuffer);
+    gl.drawElements(gl.TRIANGLES, screenFillingIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+}
+
+function drawVerticalAndDiagonalBlurPass() {
+    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    gl.useProgram(shaderProgramVerAndDiagBlurPass);
+
+    shaderProgramVerAndDiagBlurPass.vertexPositionAtribute = gl.getAttribLocation(shaderProgramVerAndDiagBlurPass, "aVertexPosition");
+    gl.enableVertexAttribArray(shaderProgramVerAndDiagBlurPass.vertexPositionPass);
+
+    shaderProgramVerAndDiagBlurPass.textureCoordAttribute = gl.getAttribLocation(shaderProgramVerAndDiagBlurPass, "aTextureCoord");
+    gl.enableVertexAttribArray(shaderProgramVerAndDiagBlurPass.textureCoordAttribute);
+
+    shaderProgramVerAndDiagBlurPass.samplerUniform = gl.getUniformLocation(shaderProgramVerAndDiagBlurPass, "uSampler");
+
+    shaderProgramVerAndDiagBlurPass.invViewCoordinatesUniform = gl.getUniformLocation(shaderProgramVerAndDiagBlurPass, "uInvViewDimensions");
+
+    shaderProgramVerAndDiagBlurPass.angleUniform = gl.getUniformLocation(shaderProgramVerAndDiagBlurPass, "uAngle");
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, screenFillingVertexPositionBuffer);
+    gl.vertexAttribPointer(shaderProgramVerAndDiagBlurPass.vertexPositionAttribute, screenFillingVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, screenFillingTextureCoordBuffer);
+    gl.vertexAttribPointer(shaderProgramVerAndDiagBlurPass.textureCoordAttribute, screenFillingTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+    gl.uniform2f(shaderProgramVerAndDiagBlurPass.invViewCoordinatesUniform, invViewDimensions_x, invViewDimensions_y);
+    gl.uniform1f(shaderProgramVerAndDiagBlurPass.angleUniform, Angle);
+
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, textureBackBufferHalf);
+    gl.uniform1i(shaderProgramVerAndDiagBlurPass.samplerUniform, 0);
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, screenFillingIndexBuffer);
     gl.drawElements(gl.TRIANGLES, screenFillingIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);

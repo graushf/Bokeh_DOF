@@ -29,6 +29,9 @@ var textureSceneBuffer;
 var backBufferHalf;
 var textureBackBufferHalf;
 
+// MRT render targets optimization
+var MRTfbData;
+
 // CoC
 var CoC = 1.0;
 var Angle = 0.0;
@@ -90,6 +93,7 @@ function webGLStart()
     var canvas = document.getElementById("WebGLCanvas");
     initGL(canvas);
     createFramebuffers();
+    setupMRT();
 
     initCamera();
     setupScene();
