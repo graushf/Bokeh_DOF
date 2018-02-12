@@ -4,19 +4,20 @@ var pMatrix = mat4.create();
 var vMatrix = mat4.create();
 
 function drawScene(programToDraw)
- {
+{
     drawScreenFillingGeometry(shaderProgramScreenFillPass);
     drawPlane(shaderProgramPhongLightingPass);
-    drawTeapot(shaderProgramPhongLightingPass, vec3.fromValues(0.0, 0.0, -60.0), vec3.fromValues(0.1, 0.1, 0.1));
-    drawSphere(shaderProgramPhongLightingPass, vec3.fromValues(10.0, 1.5, -60.0), vec4.fromValues(1.5, 1.5, 1.5));
-    drawCube(shaderProgramPhongLightingPass, vec3.fromValues(20.0, 1.5, -60.0), vec4.fromValues(2.0, 2.0, 2.0));
-    drawRing(shaderProgramPhongLightingPass, vec3.fromValues(30.0, 1.5, -60.0), vec3.fromValues(2.0, 2.0, 2.0));
-    drawTorus(shaderProgramPhongLightingPass, vec3.fromValues(40.0, 1.5, -60.0), vec3.fromValues(2.0, 2.0, 2.0));
-    drawCylinder(shaderProgramPhongLightingPass, vec3.fromValues(50.0, 1.5, -60.0), vec3.fromValues(1.0, 1.0, 1.0));
-    drawCone(shaderProgramPhongLightingPass, vec3.fromValues(60.0, 1.5, -60.0), vec3.fromValues(1.0, 1.0, 1.0));
-    drawRabbit(shaderProgramPhongLightingPass, vec3.fromValues(70.0, 0.0, -60.0), vec3.fromValues(1.0, 1.0, 1.0));
-    drawDragon(shaderProgramPhongLightingPass, vec3.fromValues(80.0, 0.0, -60.0), vec3.fromValues(0.30, 0.30, 0.30));
-    drawSuzanne(shaderProgramPhongLightingPass, vec3.fromValues(90.0, 1.0, -60.0), vec3.fromValues(1.0, 1.0, 1.0));
+    drawTeapot(shaderProgramPhongLightingPass, vec3.fromValues(0.0, 0.0, -10.0), vec3.fromValues(0.1, 0.1, 0.1));
+    drawTeapot(shaderProgramPhongLightingPass, vec3.fromValues(1.0, 0.0, -20.0), vec3.fromValues(0.1, 0.1, 0.1));
+    drawTeapot(shaderProgramPhongLightingPass, vec3.fromValues(-1.0, 0.0, -30.0), vec3.fromValues(0.1, 0.1, 0.1));
+    drawTeapot(shaderProgramPhongLightingPass, vec3.fromValues(-0.5, 0.0, -50.0), vec3.fromValues(0.1, 0.1, 0.1));
+    drawTeapot(shaderProgramPhongLightingPass, vec3.fromValues(2.0, 0.0, -70.0), vec3.fromValues(0.1, 0.1, 0.1));
+    drawTeapot(shaderProgramPhongLightingPass, vec3.fromValues(4.2, 0.0, -100.0), vec3.fromValues(0.1, 0.1, 0.1));
+    drawTeapot(shaderProgramPhongLightingPass, vec3.fromValues(0.0, 0.0, -150.0), vec3.fromValues(0.1, 0.1, 0.1));
+    drawTeapot(shaderProgramPhongLightingPass, vec3.fromValues(-3.0, 0.0, -200.0), vec3.fromValues(0.1, 0.1, 0.1));
+    drawCube(shaderProgramPhongLightingPass, vec3.fromValues(10.0, 0.5, -40.0), vec4.fromValues(1.5, 1.5, 1.5));
+    drawCube(shaderProgramPhongLightingPass, vec3.fromValues(-5.0, 0.5, -25.0), vec4.fromValues(1.5, 1.5, 1.5));
+    drawCube(shaderProgramPhongLightingPass, vec3.fromValues(9.0, 0.5, -80.0), vec4.fromValues(1.5, 1.5, 1.5));
 }
 
 function drawPlane(programShading)

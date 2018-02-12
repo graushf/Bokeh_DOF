@@ -1,2 +1,2 @@
-# Basic-3DScene
-Basic 3D scene project in WebGL with camera movement and various primitives to render to develop graphics experiments or tests
+# Bokeh_DOF
+Bokeh DOF implementation project, to implement the Bokeh effect implementation described in https://colinbarrebrisebois.com/2017/04/18/hexagonal-bokeh-blur-revisited/ in a 3D scene with depth

@@ -3,8 +3,8 @@ function initCamera() {
 	myCamera = new Camera3D();
 	var aux = vec3.fromValues(-13.34, 30.73, 51.12);
 	myCamera.CameraSetPos(aux, gl.viewportWidth, gl.viewportHeight);
-    var _pos = vec3.fromValues(-9.0000, 15.60, 31.27);
-    var _pitch = 13.75;
+    var _pos = vec3.fromValues(0.0, 3.55, 0.0);
+    var _pitch =-7.5;
     var _yaw = -90.0;
     myCamera.SetPositionAndDirectionCamera(_pos, _pitch, _yaw);
 	//_pos = vec3.fromValues(0.0, 0.0, 10.0);
