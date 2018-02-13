@@ -303,6 +303,13 @@
             uniform sampler2D uSampler;
 
             uniform float uCoc;
+
+            uniform float uAperture;
+            uniform float uFocallength;
+            uniform float uFocalplane;
+            uniform float uZNear;
+            uniform float uZFar;
+
             varying vec2 vUv;
 
             void main(void) {
@@ -311,7 +318,10 @@
                 //scene *= scene;
                 //scene *= 500.0;
 
+                float CoCScale = (uAperture * uFocallength * uFocalplane * (uZFar -uZNear)) / ((uFocalplane - uFocallength) * uZNear * uZFar);
+
                 gl_FragColor = vec4(scene, uCoc * uCoc);
+                //gl_FragColor = vec4(scene, CoCScale * CoCScale);
                 //gl_FragColor = vec4(scene, 1.0);
             }
         </script>
@@ -522,8 +532,11 @@
         <div class="container">
             <canvas id="WebGLCanvas" style="border: none;" width="1280" height="720">No canvas support</canvas>
             <div id="overlay">
-                <div>CoC (Q/A): <span id="CoCId"></span></div>
-                <div>Angle (W/S): <span id="AngleId"></span></div>
+                <div>CoC (R/F): <span id="CoCId"></span></div>
+                <div>Angle (T/G): <span id="AngleId"></span></div>
+                <div>Aperture (U/J): <span id="ApertureId"></span></div>
+                <div>Focal Plane (I/K): <span id="FocalplaneId"></span></div>
+                <div>Focal Length (O/L): <span id="FocallengthId"></span></div>
             </div>
         </div>
         <div>

@@ -1,6 +1,7 @@
 var currentlyPressedKeys = {};
 
 function handleKeyDown(event) {
+    console.log(event.keyCode);
     currentlyPressedKeys[event.keyCode] = true;
 }
 
@@ -47,6 +48,39 @@ function handleKeys() {
 	if (currentlyPressedKeys[71]) {
 		if (Angle > 0.05) {
 			Angle -= 0.05;
+		}
+    }
+
+    if (currentlyPressedKeys[85]) {
+		if (aperture < 100) {
+			aperture += 0.05;
+		}
+	}
+	if (currentlyPressedKeys[74]) {
+		if (aperture > 0.0) {
+			aperture -= 0.05;
+		}
+    }
+    
+    if (currentlyPressedKeys[73]) {
+		if (focalplane < 0.05) {
+			focalplane += 0.05;
+		}
+	}
+	if (currentlyPressedKeys[75]) {
+		if (focalplane > 0.05) {
+			focalplane -= 0.05;
+		}
+    }
+    
+    if (currentlyPressedKeys[79]) {
+		if (focallength < 5.0) {
+			focallength += 0.001;
+		}
+	}
+	if (currentlyPressedKeys[76]) {
+		if (focallength > 0.001) {
+			focallength -= 0.001;
 		}
 	}
 }

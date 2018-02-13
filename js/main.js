@@ -37,6 +37,9 @@ var MRTfbData;
 // CoC
 var CoC = 1.0;
 var Angle = 0.0;
+var aperture = 0.0;
+var focalplane = 5.0;
+var focallength = 0.020;
 
 function initGL(canvas) 
 {
