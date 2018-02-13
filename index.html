@@ -401,7 +401,7 @@
                 // Output to MRT
                 gl_FragData[0] = vec4(color.xyz, CoC);
                 gl_FragData[1] = vec4(color2.rgb + color.xyz, CoC);
-                //gl_FragData[1] = vec4(color.rgb, CoC);
+                //gl_FragData[1] = vec4(color2.rgb, CoC);
             }
 
             vec4 BlurTexture(sampler2D tex, vec2 uv, vec2 direction)
@@ -461,10 +461,12 @@
 
                 vec3 outputCol = (color.rgb + color2.rgb) * 0.5;
 
-                //gl_FragColor = vec4(outputCol, 1.0); return;
+                //gl_FragColor = vec4((color.rgb + color2.xyz) / 2.0, 1.0); return;
+                gl_FragColor = vec4(color.rgb/3.0 + (color2.rgb / 3.0), 1.0); return;
+                gl_FragColor = vec4(outputCol, 1.0); return;
 
                 // Expose. Hacked-up for this demo
-                gl_FragColor = vec4(1.0 - exp(-outputCol.rgb/0.7), 1.0);
+                //gl_FragColor = vec4(1.0 - exp(-outputCol.rgb/0.6), 1.0);
             }
 
             vec4 BlurTexture(sampler2D tex, vec2 uv, vec2 direction)

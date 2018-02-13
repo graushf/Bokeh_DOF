@@ -41,12 +41,12 @@ function handleKeys() {
 
 	if (currentlyPressedKeys[84]) {
 		if (Angle < 6.2800) {
-			Angle += 0.01;
+			Angle += 0.05;
 		}
 	}
 	if (currentlyPressedKeys[71]) {
 		if (Angle > 0.05) {
-			Angle -= 0.01;
+			Angle -= 0.05;
 		}
 	}
 }
