@@ -7,7 +7,12 @@ function drawEffectPass() {
     gl.bindFramebuffer(gl.FRAMEBUFFER, sceneBuffer);
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 
-    drawScene();
+    drawScene(shaderProgramPhongLightingPass);
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, depthColorBuffer);
+    gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+
+    drawScene(shaderProgramDepthPass);
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, backBuffer);
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
@@ -45,64 +50,69 @@ function drawScene(programToDraw)
 {
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    drawScreenFillingGeometry(shaderProgramBackgroundPass);
-    drawSceneObjects();
-    drawHexProducingSpheres();
-    drawHexProducingSpheres2();
+    if (programToDraw == shaderProgramPhongLightingPass) {
+        drawScreenFillingGeometry(shaderProgramBackgroundPass);
+    } else if (programToDraw == shaderProgramDepthPass) {
+        drawScreenFillingGeometry(shaderProgramDepthPassBackground);
+    }
+    
+    drawSceneObjects(programToDraw);
+    drawHexProducingSpheres(programToDraw);
+    drawHexProducingSpheres2(programToDraw);
 }
 
-function drawSceneObjects() {
-    drawPlane(shaderProgramPhongLightingPass);
-    drawTeapot(shaderProgramPhongLightingPass, vec3.fromValues(0.0, 0.0, -10.0), vec3.fromValues(0.1, 0.1, 0.1));
-    drawTeapot(shaderProgramPhongLightingPass, vec3.fromValues(1.0, 0.0, -20.0), vec3.fromValues(0.1, 0.1, 0.1));
-    drawTeapot(shaderProgramPhongLightingPass, vec3.fromValues(-1.0, 0.0, -30.0), vec3.fromValues(0.1, 0.1, 0.1));
-    drawTeapot(shaderProgramPhongLightingPass, vec3.fromValues(-0.5, 0.0, -50.0), vec3.fromValues(0.1, 0.1, 0.1));
-    drawTeapot(shaderProgramPhongLightingPass, vec3.fromValues(2.0, 0.0, -70.0), vec3.fromValues(0.1, 0.1, 0.1));
-    drawTeapot(shaderProgramPhongLightingPass, vec3.fromValues(4.2, 0.0, -100.0), vec3.fromValues(0.1, 0.1, 0.1));
-    drawTeapot(shaderProgramPhongLightingPass, vec3.fromValues(0.0, 0.0, -150.0), vec3.fromValues(0.1, 0.1, 0.1));
-    drawTeapot(shaderProgramPhongLightingPass, vec3.fromValues(-3.0, 0.0, -200.0), vec3.fromValues(0.1, 0.1, 0.1));
-    drawCube(shaderProgramPhongLightingPass, vec3.fromValues(10.0, 0.5, -40.0), vec4.fromValues(1.5, 1.5, 1.5));
-    drawCube(shaderProgramPhongLightingPass, vec3.fromValues(-5.0, 0.5, -25.0), vec4.fromValues(1.5, 1.5, 1.5));
-    drawCube(shaderProgramPhongLightingPass, vec3.fromValues(9.0, 0.5, -80.0), vec4.fromValues(-1.5, 3.5, 1.5));
+function drawSceneObjects(programToDraw) {
+    drawPlane(programToDraw);
+    drawTeapot(programToDraw, vec3.fromValues(0.0, 0.0, -10.0), vec3.fromValues(0.1, 0.1, 0.1));
+    drawTeapot(programToDraw, vec3.fromValues(1.0, 0.0, -20.0), vec3.fromValues(0.1, 0.1, 0.1));
+    drawTeapot(programToDraw, vec3.fromValues(-1.0, 0.0, -30.0), vec3.fromValues(0.1, 0.1, 0.1));
+    drawTeapot(programToDraw, vec3.fromValues(-0.5, 0.0, -50.0), vec3.fromValues(0.1, 0.1, 0.1));
+    drawTeapot(programToDraw, vec3.fromValues(2.0, 0.0, -70.0), vec3.fromValues(0.1, 0.1, 0.1));
+    drawTeapot(programToDraw, vec3.fromValues(4.2, 0.0, -100.0), vec3.fromValues(0.1, 0.1, 0.1));
+    drawTeapot(programToDraw, vec3.fromValues(0.0, 0.0, -150.0), vec3.fromValues(0.1, 0.1, 0.1));
+    drawTeapot(programToDraw, vec3.fromValues(-3.0, 0.0, -200.0), vec3.fromValues(0.1, 0.1, 0.1));
+    drawCube(programToDraw, vec3.fromValues(10.0, 0.5, -40.0), vec4.fromValues(1.5, 1.5, 1.5));
+    drawCube(programToDraw, vec3.fromValues(-5.0, 0.5, -25.0), vec4.fromValues(1.5, 1.5, 1.5));
+    drawCube(programToDraw, vec3.fromValues(9.0, 0.5, -80.0), vec4.fromValues(-1.5, 3.5, 1.5));
 }
 
-function drawHexProducingSpheres() {
-    drawSphereDiffuseIntense(shaderProgramPhongLightingPass, vec3.fromValues(0.0, 2.5, -10.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(120 *181/255, 10 * 134/255, 10 * 144/255));
-    drawSphereDiffuseIntense(shaderProgramPhongLightingPass, vec3.fromValues(4.0, 1.7, -10.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(10 * 214/255, 10 * 211/255, 10 * 218/255));
-    drawSphereDiffuseIntense(shaderProgramPhongLightingPass, vec3.fromValues(-4.0, 1.0, -10.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(10 * 242/255, 10 * 240/255, 10 * 241/255));
-    drawSphereDiffuseIntense(shaderProgramPhongLightingPass, vec3.fromValues(-4.3, 0.7, -10.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(10 * 57/255, 10 * 93/255, 10 * 109/255));
-    drawSphereDiffuseIntense(shaderProgramPhongLightingPass, vec3.fromValues(-3.4, 1.8, -8.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(10 * 62/255, 10 * 101/255, 10 * 54/255));
-    drawSphereDiffuseIntense(shaderProgramPhongLightingPass, vec3.fromValues(0.7, 0.4, -8.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(10 * 197/255, 10 * 197/255, 10 * 197/255));
-    drawSphereDiffuseIntense(shaderProgramPhongLightingPass, vec3.fromValues(-3.0, 2.0, -15.0), vec3.fromValues(0.40, 0.40, 0.40), vec3.fromValues(10 * 142/255, 10 * 90/255, 10 * 92/255));
-    drawSphereDiffuseIntense(shaderProgramPhongLightingPass, vec3.fromValues(6.0, 2.5, -20.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(10 * 83/255, 10 * 79/255, 10 * 114/255));
-    drawSphereDiffuseIntense(shaderProgramPhongLightingPass, vec3.fromValues(-5.0, 7.5, -25.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(10 * 132/255, 10 * 86/255, 10 * 133/255));
-    drawSphereDiffuseIntense(shaderProgramPhongLightingPass, vec3.fromValues(-10.0, 5.5, -30.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(7.5 * 200/255, 2 * 80/255, 3 * 170/255));
-    drawSphereDiffuseIntense(shaderProgramPhongLightingPass, vec3.fromValues(4.0, 6.8, -25.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(10 * 40/255, 10 * 89/255, 10 * 225/255));
-    drawSphereDiffuseIntense(shaderProgramPhongLightingPass, vec3.fromValues(10.0, 6.5, -30.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(4.0 * 130/255, 10.0 * 220/255, 10.0 * 170/255));
-    drawSphereDiffuseIntense(shaderProgramPhongLightingPass, vec3.fromValues(10.0, 3.5, -20.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(10.0 * 210/255, 10.0 * 175/255, 10.0 * 57/255));
-    drawSphereDiffuseIntense(shaderProgramPhongLightingPass, vec3.fromValues(6.0, 2.5, -40.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(10.0 * 195/255, 10.0 * 68/255, 10.0 * 110/255));
+function drawHexProducingSpheres(programToDraw) {
+    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(0.0, 2.5, -10.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(120 *181/255, 10 * 134/255, 10 * 144/255));
+    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(4.0, 1.7, -10.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(10 * 214/255, 10 * 211/255, 10 * 218/255));
+    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(-4.0, 1.0, -10.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(10 * 242/255, 10 * 240/255, 10 * 241/255));
+    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(-4.3, 0.7, -10.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(10 * 57/255, 10 * 93/255, 10 * 109/255));
+    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(-3.4, 1.8, -8.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(10 * 62/255, 10 * 101/255, 10 * 54/255));
+    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(0.7, 0.4, -8.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(10 * 197/255, 10 * 197/255, 10 * 197/255));
+    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(-3.0, 2.0, -15.0), vec3.fromValues(0.40, 0.40, 0.40), vec3.fromValues(10 * 142/255, 10 * 90/255, 10 * 92/255));
+    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(6.0, 2.5, -20.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(10 * 83/255, 10 * 79/255, 10 * 114/255));
+    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(-5.0, 7.5, -25.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(10 * 132/255, 10 * 86/255, 10 * 133/255));
+    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(-10.0, 5.5, -30.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(7.5 * 200/255, 2 * 80/255, 3 * 170/255));
+    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(4.0, 6.8, -25.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(10 * 40/255, 10 * 89/255, 10 * 225/255));
+    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(10.0, 6.5, -30.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(4.0 * 130/255, 10.0 * 220/255, 10.0 * 170/255));
+    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(10.0, 3.5, -20.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(10.0 * 210/255, 10.0 * 175/255, 10.0 * 57/255));
+    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(6.0, 2.5, -40.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(10.0 * 195/255, 10.0 * 68/255, 10.0 * 110/255));
 }
 
-function drawHexProducingSpheres2() {
-    drawSphereDiffuseIntense(shaderProgramPhongLightingPass, vec3.fromValues(2.6, 1.69, -50.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(12.15 * 0.51, 24.95 * 0.23, 45.31 * 0.78));
-    drawSphereDiffuseIntense(shaderProgramPhongLightingPass, vec3.fromValues(8.73, 5.53, -70.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(51.9 * 0.76, 7.95 * 0.61, 9.11 * 0.38));
-    drawSphereDiffuseIntense(shaderProgramPhongLightingPass, vec3.fromValues(3.21, 3.93, -60.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(11.8 * 0.1, 32.85 * 0.91, 6.56 * 0.32));
-    drawSphereDiffuseIntense(shaderProgramPhongLightingPass, vec3.fromValues(2.42, 9.89, -100.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(26.4 * 0.31, 10.25 * 0.94, 7.78 * 0.3));
-    drawSphereDiffuseIntense(shaderProgramPhongLightingPass, vec3.fromValues(-1.35, 4.18, -120.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(3.81 * 0.39, 1.64 * 0.03, 43.41 * 0.15));
-    drawSphereDiffuseIntense(shaderProgramPhongLightingPass, vec3.fromValues(-1.56, 2.17, -130.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(10.04 *0.44, 0.1 * 0.72, 12.96 * 0.47));
-    drawSphereDiffuseIntense(shaderProgramPhongLightingPass, vec3.fromValues(-3.0, 0.76, -100.0), vec3.fromValues(0.40, 0.40, 0.40), vec3.fromValues(11.8 * 0.08, 4.41 * 0.55, 13.65 * 0.57));
-    drawSphereDiffuseIntense(shaderProgramPhongLightingPass, vec3.fromValues(4.82, 2.59, -150.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(11.19 * 0.14, 1.46 * 0.77, 7.62 * 0.72));
-    drawSphereDiffuseIntense(shaderProgramPhongLightingPass, vec3.fromValues(2.85, 3.06, -150.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(14.58 * 0.05, 1.22 * 0.58, 14.44 * 0.5));
-    drawSphereDiffuseIntense(shaderProgramPhongLightingPass, vec3.fromValues(2.36, 3.77, -160.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(28.98 * 0.84, 4.35 * 0.73, 10.18 * 0.06));
-    drawSphereDiffuseIntense(shaderProgramPhongLightingPass, vec3.fromValues(-0.55, 5.33, -200.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(9.07 * 0.34, 8.56 * 0.73, 10.51 * 0.96));
-    drawSphereDiffuseIntense(shaderProgramPhongLightingPass, vec3.fromValues(-4.41, 1.51, -80.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(13.75 * 0.15, 6 * 0.39, 16.55 * 0.52));
-    drawSphereDiffuseIntense(shaderProgramPhongLightingPass, vec3.fromValues(-8.7, 4.25, -90.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(12.83 * 0.13, 4.92 * 0.960, 4.17 * 0.57));
-    drawSphereDiffuseIntense(shaderProgramPhongLightingPass, vec3.fromValues(-3.35, 7.72, -50.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(14.78 * 0.02, 5.91 * 0.61, 6.3 * 0.11));
-    drawSphereDiffuseIntense(shaderProgramPhongLightingPass, vec3.fromValues(-5.83, 7.73, -65.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(3.32 * 0.54, 5.64 * 0.64, 19.02 * 0.16));
-    drawSphereDiffuseIntense(shaderProgramPhongLightingPass, vec3.fromValues(-3.95, 5.28, -60.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(11.65 * 0.23, 3.84 * 0.75, 5.5 * 0.29));
-    drawSphereDiffuseIntense(shaderProgramPhongLightingPass, vec3.fromValues(2.09, 2.65, -70.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(5.6 * 0.72, 9.03 * 0.32, 18 * 0.19));
-    drawSphereDiffuseIntense(shaderProgramPhongLightingPass, vec3.fromValues(-3.53, 7.98, -80.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(8.42 * 0.34, 2.82 * 0.96, 13.66 * 0.17));
-    drawSphereDiffuseIntense(shaderProgramPhongLightingPass, vec3.fromValues(6.78, 7.45, -95.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(5.2 * 0.95, 2.77 * 0.47, 4.84 * 0.69));
+function drawHexProducingSpheres2(programToDraw) {
+    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(2.6, 1.69, -50.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(12.15 * 0.51, 24.95 * 0.23, 45.31 * 0.78));
+    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(8.73, 5.53, -70.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(51.9 * 0.76, 7.95 * 0.61, 9.11 * 0.38));
+    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(3.21, 3.93, -60.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(11.8 * 0.1, 32.85 * 0.91, 6.56 * 0.32));
+    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(2.42, 9.89, -100.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(26.4 * 0.31, 10.25 * 0.94, 7.78 * 0.3));
+    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(-1.35, 4.18, -120.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(3.81 * 0.39, 1.64 * 0.03, 43.41 * 0.15));
+    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(-1.56, 2.17, -130.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(10.04 *0.44, 0.1 * 0.72, 12.96 * 0.47));
+    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(-3.0, 0.76, -100.0), vec3.fromValues(0.40, 0.40, 0.40), vec3.fromValues(11.8 * 0.08, 4.41 * 0.55, 13.65 * 0.57));
+    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(4.82, 2.59, -150.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(11.19 * 0.14, 1.46 * 0.77, 7.62 * 0.72));
+    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(2.85, 3.06, -150.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(14.58 * 0.05, 1.22 * 0.58, 14.44 * 0.5));
+    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(2.36, 3.77, -160.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(28.98 * 0.84, 4.35 * 0.73, 10.18 * 0.06));
+    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(-0.55, 5.33, -200.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(9.07 * 0.34, 8.56 * 0.73, 10.51 * 0.96));
+    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(-4.41, 1.51, -80.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(13.75 * 0.15, 6 * 0.39, 16.55 * 0.52));
+    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(-8.7, 4.25, -90.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(12.83 * 0.13, 4.92 * 0.960, 4.17 * 0.57));
+    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(-3.35, 7.72, -50.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(14.78 * 0.02, 5.91 * 0.61, 6.3 * 0.11));
+    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(-5.83, 7.73, -65.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(3.32 * 0.54, 5.64 * 0.64, 19.02 * 0.16));
+    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(-3.95, 5.28, -60.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(11.65 * 0.23, 3.84 * 0.75, 5.5 * 0.29));
+    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(2.09, 2.65, -70.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(5.6 * 0.72, 9.03 * 0.32, 18 * 0.19));
+    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(-3.53, 7.98, -80.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(8.42 * 0.34, 2.82 * 0.96, 13.66 * 0.17));
+    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(6.78, 7.45, -95.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(5.2 * 0.95, 2.77 * 0.47, 4.84 * 0.69));
 }
 
 function drawPlane(programShading)
@@ -1092,9 +1102,16 @@ function renderScenePass() {
     shaderProgramScenePass.textureCoordAttribute = gl.getAttribLocation(shaderProgramScenePass, "aTextureCoord");
     gl.enableVertexAttribArray(shaderProgramScenePass.textureCoordAttribute);
 
-    shaderProgramScenePass.samplerUniform = gl.getUniformLocation(shaderProgramScenePass, "uSampler");
+    shaderProgramScenePass.samplerSceneColorUniform = gl.getUniformLocation(shaderProgramScenePass, "uSamplerColor");
+    shaderProgramScenePass.samplerSceneDepthUniform = gl.getUniformLocation(shaderProgramScenePass, "uSamplerDepth")
 
     shaderProgramScenePass.cocUniform = gl.getUniformLocation(shaderProgramScenePass, "uCoc");
+
+    shaderProgramScenePass.apertureUniform = gl.getUniformLocation(shaderProgramScenePass, "uAperture");
+    shaderProgramScenePass.focalplaneUniform = gl.getUniformLocation(shaderProgramScenePass, "uFocallength");
+    shaderProgramScenePass.focallengthUniform = gl.getUniformLocation(shaderProgramScenePass, "uFocalplane");
+    shaderProgramScenePass.znearUniform = gl.getUniformLocation(shaderProgramScenePass, "uZNear");
+    shaderProgramScenePass.zfarUniform = gl.getUniformLocation(shaderProgramScenePass, "uZFar");
 
     gl.bindBuffer(gl.ARRAY_BUFFER, screenFillingVertexPositionBuffer);
     gl.vertexAttribPointer(shaderProgramScenePass.vertexPositionAttribute, screenFillingVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
@@ -1103,10 +1120,19 @@ function renderScenePass() {
     gl.vertexAttribPointer(shaderProgramScenePass.textureCoordAttribute, screenFillingTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
     gl.uniform1f(shaderProgramScenePass.cocUniform, CoC);
+    gl.uniform1f(shaderProgramScenePass.apertureUniform, aperture);
+    gl.uniform1f(shaderProgramScenePass.focalplaneUniform, focalplane);
+    gl.uniform1f(shaderProgramScenePass.focallengthUniform, focallength);
+    gl.uniform1f(shaderProgramScenePass.znearUniform, myCamera.GetNearValue());
+    gl.uniform1f(shaderProgramScenePass.zfarUniform, myCamera.GetFarValue());
 
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, textureSceneBuffer);
-    gl.uniform1i(shaderProgramScenePass.samplerUniform, 0);
+    gl.uniform1i(shaderProgramScenePass.samplerSceneColorUniform, 0);
+
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, textureDepthColorBuffer);
+    gl.uniform1i(shaderProgramScenePass.samplerSceneDepthUniform, 1);
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, screenFillingIndexBuffer);
     gl.drawElements(gl.TRIANGLES, screenFillingIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);

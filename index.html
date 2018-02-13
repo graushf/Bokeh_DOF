@@ -297,10 +297,19 @@
             }
         </script>
 
+        <script id="drawDepthPass-fs" type="x-shader/x-fragment">
+            precision mediump float;
+
+            void main(void) {
+                gl_FragColor = vec4(gl_FragCoord.z, gl_FragCoord.z, gl_FragCoord.z, 1.0);
+            }
+        </script>
+
         <script id="scenePass-fs" type="x-shader/x-fragment">
             precision mediump float;
 
-            uniform sampler2D uSampler;
+            uniform sampler2D uSamplerColor;
+            uniform sampler2D uSamplerDepth;
 
             uniform float uCoc;
 
@@ -313,15 +322,25 @@
             varying vec2 vUv;
 
             void main(void) {
-                vec3 scene = texture2D(uSampler, vUv).rgb;
+                //gl_FragColor = vec4(texture2D(uSamplerColor, vUv).rgb, 1.0); return;
+                //gl_FragColor = vec4(texture2D(uSamplerDepth, vUv).rgb, 1.0); return;
+
+                vec3 scene = texture2D(uSamplerColor, vUv).rgb;
                 //scene *= dot(vec3(0.3, 0.59, 0.11), scene);
                 //scene *= scene;
                 //scene *= 500.0;
 
                 float CoCScale = (uAperture * uFocallength * uFocalplane * (uZFar -uZNear)) / ((uFocalplane - uFocallength) * uZNear * uZFar);
+                float CoCBias = (uAperture * uFocallength * (uZNear - uFocalplane)) / ((uFocalplane - uFocallength) * uZNear);
 
-                gl_FragColor = vec4(scene, uCoc * uCoc);
-                //gl_FragColor = vec4(scene, CoCScale * CoCScale);
+                float depthValue = texture2D(uSamplerDepth, vUv).x;
+
+                float CoC = abs(depthValue * CoCScale + CoCBias);
+
+                //gl_FragColor = vec4(CoC, 0.0, 0.0, 1.0); return;
+
+                //gl_FragColor = vec4(scene, uCoc * uCoc);
+                gl_FragColor = vec4(scene, CoC * CoC);
                 //gl_FragColor = vec4(scene, 1.0);
             }
         </script>

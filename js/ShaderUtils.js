@@ -5,6 +5,8 @@ var shaderProgramScreenFillPass2;
 var shaderProgramScenePass;
 var shaderProgramVerAndDiagBlurPass;
 var shaderProgramRhombiBlurPass;
+var shaderProgramDepthPass;
+var shaderProgramDepthPassBackground;
 
 function getShader(gl, id) 
 {
@@ -52,6 +54,8 @@ function setupShadersScene()
 	initShadersDownsamplePass();
 	initShadersVerAndDiagBlurPass();
 	initShadersRhombiBlurPass();
+	initShadersDepthPass();
+	initShadersDepthPassBackground();
 }
 
 function initShaderBasic() 
@@ -165,6 +169,34 @@ function initShadersRhombiBlurPass() {
 	gl.linkProgram(shaderProgramRhombiBlurPass);
 
 	if (!gl.getProgramParameter(shaderProgramRhombiBlurPass, gl.LINK_STATUS)) {
+		alert("Could not initalise shaders");
+	}
+}
+
+function initShadersDepthPass() {
+	var fragmentShader = getShader(gl, "drawDepthPass-fs");
+	var vertexShader = getShader(gl, "phongLightingPass-vs");
+	
+	shaderProgramDepthPass = gl.createProgram();
+	gl.attachShader(shaderProgramDepthPass, vertexShader);
+	gl.attachShader(shaderProgramDepthPass, fragmentShader);
+	gl.linkProgram(shaderProgramDepthPass);
+
+	if (!gl.getProgramParameter(shaderProgramDepthPass, gl.LINK_STATUS)) {
+		alert("Could not initialise shaders");
+	}
+}
+
+function initShadersDepthPassBackground() {
+	var fragmentShader = getShader(gl, "drawDepthPass-fs");
+	var vertexShader = getShader(gl, "drawBackgroundPass-vs");
+
+	shaderProgramDepthPassBackground = gl.createProgram();
+	gl.attachShader(shaderProgramDepthPassBackground, vertexShader);
+	gl.attachShader(shaderProgramDepthPassBackground, fragmentShader);
+	gl.linkProgram(shaderProgramDepthPassBackground);
+
+	if (!gl.getProgramParameter(shaderProgramDepthPassBackground, gl.LINK_STATUS)) {
 		alert("Could not initalise shaders");
 	}
 }

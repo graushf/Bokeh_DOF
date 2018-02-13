@@ -30,6 +30,8 @@ var backBufferHalf;
 var textureBackBufferHalf;
 var rhombiBlurBuffer;
 var textureRhombiBlurBuffer;
+var depthColorBuffer;
+var textureDepthColorBuffer;
 
 // MRT render targets optimization
 var MRTfbData;
@@ -37,7 +39,7 @@ var MRTfbData;
 // CoC
 var CoC = 1.0;
 var Angle = 0.0;
-var aperture = 0.0;
+var aperture = 0.1;
 var focalplane = 5.0;
 var focallength = 0.020;
 

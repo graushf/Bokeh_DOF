@@ -1,7 +1,6 @@
 var currentlyPressedKeys = {};
 
 function handleKeyDown(event) {
-    console.log(event.keyCode);
     currentlyPressedKeys[event.keyCode] = true;
 }
 
@@ -57,13 +56,13 @@ function handleKeys() {
 		}
 	}
 	if (currentlyPressedKeys[74]) {
-		if (aperture > 0.0) {
+		if (aperture > 0.05) {
 			aperture -= 0.05;
 		}
     }
     
     if (currentlyPressedKeys[73]) {
-		if (focalplane < 0.05) {
+		if (focalplane < 5000) {
 			focalplane += 0.05;
 		}
 	}
