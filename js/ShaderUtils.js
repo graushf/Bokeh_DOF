@@ -4,6 +4,7 @@ var shaderProgramBackgroundPass;
 var shaderProgramScreenFillPass2;
 var shaderProgramScenePass;
 var shaderProgramVerAndDiagBlurPass;
+var shaderProgramRhombiBlurPass;
 
 function getShader(gl, id) 
 {
@@ -50,6 +51,7 @@ function setupShadersScene()
 	initShadersScenePass();
 	initShadersDownsamplePass();
 	initShadersVerAndDiagBlurPass();
+	initShadersRhombiBlurPass();
 }
 
 function initShaderBasic() 
@@ -151,4 +153,18 @@ function initShadersVerAndDiagBlurPass() {
     if (!gl.getProgramParameter(shaderProgramVerAndDiagBlurPass, gl.LINK_STATUS)) {
         alert("Could not initialise shaders");
     }
+}
+
+function initShadersRhombiBlurPass() {
+	var fragmentShader = getShader(gl, "rhombiBlurPass-fs");
+	var vertexShader = getShader(gl, "screenFillingTexture-vs");
+
+	shaderProgramRhombiBlurPass = gl.createProgram();
+	gl.attachShader(shaderProgramRhombiBlurPass, vertexShader);
+	gl.attachShader(shaderProgramRhombiBlurPass, fragmentShader);
+	gl.linkProgram(shaderProgramRhombiBlurPass);
+
+	if (!gl.getProgramParameter(shaderProgramRhombiBlurPass, gl.LINK_STATUS)) {
+		alert("Could not initalise shaders");
+	}
 }

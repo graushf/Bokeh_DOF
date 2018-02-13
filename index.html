@@ -401,6 +401,7 @@
                 // Output to MRT
                 gl_FragData[0] = vec4(color.xyz, CoC);
                 gl_FragData[1] = vec4(color2.rgb + color.xyz, CoC);
+                //gl_FragData[1] = vec4(color.rgb, CoC);
             }
 
             vec4 BlurTexture(sampler2D tex, vec2 uv, vec2 direction)
@@ -421,6 +422,70 @@
 
                 return (finalColor / blurAmount);
             }
+        </script>
+
+        <script id="rhombiBlurPass-fs" type="x-shader/x-fragment">
+            precision mediump float;
+
+            #define PI 3.1415926535897932384626433832795
+            #define NUM_SAMPLES 16
+
+            uniform sampler2D uVerticalBlurTexture;
+            uniform sampler2D uDiagonalBlurTexture;
+
+            uniform vec2 uInvViewDimensions;
+
+            uniform float uAngle;
+
+            varying vec2 vUv;
+
+            // prototype functions
+            vec4 BlurTexture(sampler2D tex, vec2 uv, vec2 direction);
+            
+            void main(void) {
+                //gl_FragColor = vec4(texture2D(uDiagonalBlurTexture, vUv).xyz, 1.0); return;
+                // Get the centre to determine the radius of the blur
+                vec4 centerColor = texture2D(uVerticalBlurTexture, vUv);
+                vec4 centerColor2 = texture2D(uDiagonalBlurTexture, vUv);
+                float coc = centerColor.a;
+                float coc2 = centerColor.a;
+
+
+                // Compute the blur direction. Here, diagonal
+                vec2 blurDirection = coc * uInvViewDimensions * vec2(cos(uAngle + PI/6.0), sin(uAngle + PI/6.0));
+                vec2 blurDirection2 = coc2 * uInvViewDimensions * vec2(cos(uAngle + 5.0 * PI/6.0), sin(uAngle + 5.0 * PI/6.0));
+
+                // Blur using the weights to bias it
+                vec4 color = BlurTexture(uVerticalBlurTexture, vUv, blurDirection) * coc;
+                vec4 color2 = BlurTexture(uDiagonalBlurTexture, vUv, blurDirection2) * coc2;
+
+                vec3 outputCol = (color.rgb + color2.rgb) * 0.5;
+
+                //gl_FragColor = vec4(outputCol, 1.0); return;
+
+                // Expose. Hacked-up for this demo
+                gl_FragColor = vec4(1.0 - exp(-outputCol.rgb/0.7), 1.0);
+            }
+
+            vec4 BlurTexture(sampler2D tex, vec2 uv, vec2 direction)
+            {
+                vec4 finalColor = vec4(0.0);
+                float blurAmount = 0.0;
+
+                // This offset is important
+                uv += direction * 0.5;
+
+                for (int i = 0; i < NUM_SAMPLES; ++i)
+                {
+                    vec4 color = texture2D(tex, uv + direction * float(i));
+                    color *= color.a;
+                    blurAmount += color.a;
+                    finalColor += color;
+                }
+
+                return (finalColor / blurAmount);
+            }
+
         </script>
 
         <script id="screenFillingTexture-fs" type="x-shader/x-fragment">

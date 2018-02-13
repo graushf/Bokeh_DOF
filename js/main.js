@@ -28,6 +28,8 @@ var sceneBuffer;
 var textureSceneBuffer;
 var backBufferHalf;
 var textureBackBufferHalf;
+var rhombiBlurBuffer;
+var textureRhombiBlurBuffer;
 
 // MRT render targets optimization
 var MRTfbData;
