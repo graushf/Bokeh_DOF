@@ -66,13 +66,13 @@ function handleKeys() {
     }
     
     if (currentlyPressedKeys[73]) {
-		if (focalplane < 5000) {
-			focalplane += 0.1;
+		if (focalplane < 1.0) {
+			focalplane += 0.001;
 		}
 	}
 	if (currentlyPressedKeys[75]) {
 		if (focalplane > 0.1) {
-			focalplane -= 0.1;
+			focalplane -= 0.001;
 		}
     }
     

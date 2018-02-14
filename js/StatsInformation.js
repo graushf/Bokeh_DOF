@@ -1,5 +1,6 @@
 var CoCNode, AngleNode;
 var ApertureNode, focalplaneNode, focallengthNode;
+var CoCScaleNode, CoCBiasNode;
 
 function initStatistics() {
     var CoCElement = document.getElementById("CoCId");
@@ -9,6 +10,9 @@ function initStatistics() {
     var focalplaneElement = document.getElementById("FocalplaneId");
     var focallengthElement = document.getElementById("FocallengthId");
 
+    var CoCScaleElement = document.getElementById("CoCScaleId");
+    var CoCBiasElement = document.getElementById("CoCBiasId");
+
     CoCNode = document.createTextNode("");
     AngleNode = document.createTextNode("");
 
@@ -16,12 +20,18 @@ function initStatistics() {
     focalplaneNode = document.createTextNode("");
     focallengthNode = document.createTextNode("");
 
+    CoCScaleNode = document.createTextNode("");
+    CoCBiasNode = document.createTextNode("");
+
     CoCElement.appendChild(CoCNode);
     AngleElement.appendChild(AngleNode);
 
     ApertureElement.appendChild(ApertureNode);
     focalplaneElement.appendChild(focalplaneNode);
     focallengthElement.appendChild(focallengthNode);
+
+    CoCScaleElement.appendChild(CoCScaleNode);
+    CoCBiasElement.appendChild(CoCBiasNode);
 }
 
 function handleStatistics() {
@@ -32,10 +42,16 @@ function handleStatistics() {
     var _focalplaneValue = focalplane;
     var _focallengthValue = focallength;
 
+    var _CoCScaleValue = CoCScale;
+    var _CoCBiasValue = CoCBias;
+
     CoCNode.nodeValue = _CoCValue.toFixed(2);
     AngleNode.nodeValue = _AngleValue.toFixed(2);
 
     ApertureNode.nodeValue = _ApertureValue.toFixed(2);
     focalplaneNode.nodeValue = _focalplaneValue.toFixed(3);
     focallengthNode.nodeValue = _focallengthValue.toFixed(2) +"m";
+
+    CoCScaleNode.nodeValue = _CoCScaleValue.toFixed(4);
+    CoCBiasNode.nodeValue = _CoCBiasValue.toFixed(4);
 }

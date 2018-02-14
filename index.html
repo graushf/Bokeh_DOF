@@ -339,13 +339,13 @@
                 //scene *= scene;
                 //scene *= 500.0;
 
-                //float CoCScale = uCoCScale;
-                //float CoCBias = uCoCBias;
+                float CoCScale = uCoCScale;
+                float CoCBias = uCoCBias;
 
 
 
-                float CoCScale = (uAperture * uFocallength * uFocalplane * (uZFar -uZNear)) / ((uFocalplane - uFocallength) * uZNear * uZFar);
-                float CoCBias = (uAperture * uFocallength * (uZNear - uFocalplane)) / ((uFocalplane - uFocallength) * uZNear);
+                //float CoCScale = (uAperture * uFocallength * uFocalplane * (uZFar -uZNear)) / ((uFocalplane - uFocallength) * uZNear * uZFar);
+                //float CoCBias = (uAperture * uFocallength * (uZNear - uFocalplane)) / ((uFocalplane - uFocallength) * uZNear);
 
 
                 float depthValue = texture2D(uSamplerDepth, vUv).x;
@@ -359,7 +359,7 @@
 
                 float CoC = abs(depthValue * CoCScale + CoCBias);
 
-                //gl_FragColor = vec4(CoC, 0.0, 0.0, 1.0); return;
+                gl_FragColor = vec4(CoC, 0.0, 0.0, 1.0); return;
 
                 //gl_FragColor = vec4(scene, uCoc * uCoc);
                 gl_FragColor = vec4(scene, CoC * CoC);
@@ -541,6 +541,30 @@
 
         </script>
 
+        <script id="linearDepth-fs" type="x-shader/x-fragment">
+            precision mediump float;
+
+            uniform sampler2D uSampler;
+            uniform float uNear;
+            uniform float uFar;
+
+            varying vec2 vUv;
+
+            float LinearizeDepth(float depth) 
+            {
+                float z = depth * 2.0 - 1.0; // back to NDC 
+                return (2.0 * uNear * uFar) / (uFar + uNear - z * (uFar - uNear));	
+            }
+
+            void main(void) {
+                float depthValue = texture2D(uSampler, vUv).x;
+                
+                float linZ = LinearizeDepth(depthValue) / uFar;
+                gl_FragColor = vec4(vec3(linZ), 1.0);
+            }
+
+        </script>
+
         <script id="screenFillingTexture-fs" type="x-shader/x-fragment">
             precision mediump float;
 
@@ -578,6 +602,8 @@
                 <div>Aperture (U/J): <span id="ApertureId"></span></div>
                 <div>Focal Plane (I/K): <span id="FocalplaneId"></span></div>
                 <div>Focal Length (O/L): <span id="FocallengthId"></span></div>
+                <div>CoCScale: <span id="CoCScaleId"></span></div>
+                <div>CoCBias: <span id="CoCBiasId"></span></div>
             </div>
         </div>
         <div>
