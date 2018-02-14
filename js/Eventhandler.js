@@ -1,11 +1,15 @@
 var currentlyPressedKeys = {};
 
 function handleKeyDown(event) {
+    console.log(event.keyCode);
     currentlyPressedKeys[event.keyCode] = true;
 }
 
 function handleKeyUp(event) {
     currentlyPressedKeys[event.keyCode] = false;
+    if (event.keyCode == 16) {
+        myCamera.MovementSpeed = 3.0;
+    }
 }
 
 function handleKeys() {
@@ -63,12 +67,12 @@ function handleKeys() {
     
     if (currentlyPressedKeys[73]) {
 		if (focalplane < 5000) {
-			focalplane += 0.05;
+			focalplane += 0.1;
 		}
 	}
 	if (currentlyPressedKeys[75]) {
-		if (focalplane > 0.05) {
-			focalplane -= 0.05;
+		if (focalplane > 0.1) {
+			focalplane -= 0.1;
 		}
     }
     
@@ -81,7 +85,14 @@ function handleKeys() {
 		if (focallength > 0.001) {
 			focallength -= 0.001;
 		}
-	}
+    }
+
+    if (currentlyPressedKeys[16]) {
+        myCamera.MovementSpeed = 0.03;
+    }
+    
+    console.log(myCamera.MovementSpeed);
+    
 }
 
 var xoffset;

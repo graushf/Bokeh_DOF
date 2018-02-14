@@ -44,7 +44,7 @@ function Camera3D() {
 	this.SCROLLSENSITIVITY = 0.05;
 
 	this.Near = 0.1;
-	this.Far = 8000;
+	this.Far = 2000;
 
 	this.Camera = function(WIDTH, HEIGHT) {
 		var position = vec3.create();

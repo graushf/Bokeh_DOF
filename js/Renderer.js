@@ -43,7 +43,7 @@ function drawEffectPass() {
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
     //drawScreenTexture();
     //drawScreenFillingGeometry(shaderProgramScrFillTexturePass);
-    renderScrFillTexture(textureRhombiBlurBuffer);
+    renderScrFillTexture(textureBackBuffer);
 }
 
 function drawScene(programToDraw)
@@ -1048,6 +1048,12 @@ function drawScreenFillingGeometry(programShading) {
         gl.bindTexture(gl.TEXTURE_2D, textureBackBuffer);
         gl.uniform1i(programShading.uSamplerUniform, 0);
     }
+
+    if (programShading == shaderProgramDepthPassBackground) {
+        programShading.isBackgroundUniform = gl.getUniformLocation(programShading, "uIsBackground");
+
+        gl.uniform1i(programShading.isBackgroundUniform, 1);
+    }
     
 
     gl.bindBuffer(gl.ARRAY_BUFFER, screenFillingVertexPositionBuffer);
@@ -1107,6 +1113,9 @@ function renderScenePass() {
 
     shaderProgramScenePass.cocUniform = gl.getUniformLocation(shaderProgramScenePass, "uCoc");
 
+    shaderProgramScenePass.cocScaleUniform = gl.getUniformLocation(shaderProgramScenePass, "uCoCScale");
+    shaderProgramScenePass.cocBiasUniform = gl.getUniformLocation(shaderProgramScenePass, "uCoCBias");
+
     shaderProgramScenePass.apertureUniform = gl.getUniformLocation(shaderProgramScenePass, "uAperture");
     shaderProgramScenePass.focalplaneUniform = gl.getUniformLocation(shaderProgramScenePass, "uFocallength");
     shaderProgramScenePass.focallengthUniform = gl.getUniformLocation(shaderProgramScenePass, "uFocalplane");
@@ -1119,9 +1128,23 @@ function renderScenePass() {
     gl.bindBuffer(gl.ARRAY_BUFFER, screenFillingTextureCoordBuffer);
     gl.vertexAttribPointer(shaderProgramScenePass.textureCoordAttribute, screenFillingTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
+    var zfar = myCamera.GetFarValue();
+    var znear = myCamera.GetNearValue(); 
+    
+    var CoCScale = (aperture * focallength * focalplane * (zfar -znear)) / ((focalplane - focallength) * znear * zfar);
+    var CoCBias = (aperture * focallength * (znear - focalplane)) / ((focalplane - focallength) * znear);
+
+    //console.log("CoCScale: "+ CoCScale);
+    //console.log("CoCBias: "+ CoCBias);
+
+    var focalplaneNormalized = (Math.abs(focalplane) - znear) / (zfar - znear);
+
+    gl.uniform1f(shaderProgramScenePass.cocScaleUniform, CoCScale);
+    gl.uniform1f(shaderProgramScenePass.cocBiasUniform, CoCBias);
+
     gl.uniform1f(shaderProgramScenePass.cocUniform, CoC);
     gl.uniform1f(shaderProgramScenePass.apertureUniform, aperture);
-    gl.uniform1f(shaderProgramScenePass.focalplaneUniform, focalplane);
+    gl.uniform1f(shaderProgramScenePass.focalplaneUniform, focalplaneNormalized);
     gl.uniform1f(shaderProgramScenePass.focallengthUniform, focallength);
     gl.uniform1f(shaderProgramScenePass.znearUniform, myCamera.GetNearValue());
     gl.uniform1f(shaderProgramScenePass.zfarUniform, myCamera.GetFarValue());

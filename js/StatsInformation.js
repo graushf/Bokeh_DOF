@@ -36,6 +36,6 @@ function handleStatistics() {
     AngleNode.nodeValue = _AngleValue.toFixed(2);
 
     ApertureNode.nodeValue = _ApertureValue.toFixed(2);
-    focalplaneNode.nodeValue = _focalplaneValue.toFixed(2) + "m";
+    focalplaneNode.nodeValue = _focalplaneValue.toFixed(3);
     focallengthNode.nodeValue = _focallengthValue.toFixed(2) +"m";
 }
