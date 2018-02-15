@@ -322,6 +322,8 @@
             uniform float uCoCScale;
             uniform float uCoCBias;
 
+            uniform int uDebugCoC;
+
             uniform float uAperture;
             uniform float uFocallength;
             uniform float uFocalplane;
@@ -331,38 +333,24 @@
             varying vec2 vUv;
 
             void main(void) {
-                //gl_FragColor = vec4(texture2D(uSamplerColor, vUv).rgb, 1.0); return;
-                gl_FragColor = vec4(texture2D(uSamplerDepth, vUv).rgb, 1.0); return;
-
                 vec3 scene = texture2D(uSamplerColor, vUv).rgb;
-                //scene *= dot(vec3(0.3, 0.59, 0.11), scene);
-                //scene *= scene;
-                //scene *= 500.0;
 
                 float CoCScale = uCoCScale;
                 float CoCBias = uCoCBias;
 
 
-
-                //float CoCScale = (uAperture * uFocallength * uFocalplane * (uZFar -uZNear)) / ((uFocalplane - uFocallength) * uZNear * uZFar);
-                //float CoCBias = (uAperture * uFocallength * (uZNear - uFocalplane)) / ((uFocalplane - uFocallength) * uZNear);
-
-
                 float depthValue = texture2D(uSamplerDepth, vUv).x;
+                //gl_FragColor = vec4(vec3(depthValue), 1.0); return;
 
-                //if (depthValue < uFocalplane) {
-                //    gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
-                //} else {
-                //    gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0);
-                //}
-                //return;
 
-                float CoC = abs(depthValue * CoCScale + CoCBias);
+                float _CoC = abs(depthValue * CoCScale + CoCBias);
 
-                gl_FragColor = vec4(CoC, 0.0, 0.0, 1.0); return;
+                if (uDebugCoC == 1) {
+                    gl_FragColor = vec4(_CoC, 0.0, 0.0, 1.0); return;
+                }
 
                 //gl_FragColor = vec4(scene, uCoc * uCoc);
-                gl_FragColor = vec4(scene, CoC * CoC);
+                gl_FragColor = vec4(scene, _CoC * _CoC);
                 //gl_FragColor = vec4(scene, 1.0);
             }
         </script>
@@ -558,7 +546,7 @@
                 return (2.0 * uNear * uFar) / (uFar + uNear - z * (uFar - uNear));	
             }
 
-            void main(void) {
+            void main(void) {   
                 //gl_FragColor = vec4(texture2D(uSampler, vUv).xyz, 1.0); return;
                 float depthValue = texture2D(uSampler, vUv).x;
                 
@@ -567,7 +555,7 @@
                 gl_FragColor = vec4(vec3(linZ/uFar), 1.0);
                 
                 if (linZ < uFocalPlane) {
-                    gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+                    gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0);
                 }
             }
 

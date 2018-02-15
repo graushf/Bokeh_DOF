@@ -4,6 +4,7 @@ var pMatrix = mat4.create();
 var vMatrix = mat4.create();
 
 function drawEffectPass() {
+
     gl.bindFramebuffer(gl.FRAMEBUFFER, sceneBuffer);
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 
@@ -17,8 +18,11 @@ function drawEffectPass() {
     gl.bindFramebuffer(gl.FRAMEBUFFER, backBuffer);
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 
+    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
     //renderScrFillTexture(textureSceneBuffer);
-    renderScenePass();
+    renderScenePass(0);
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, backBufferHalf);
     gl.viewport(0, 0, gl.viewportWidth/downsampleCoefficient, gl.viewportHeight/downsampleCoefficient);
@@ -42,15 +46,18 @@ function drawEffectPass() {
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 
-    //gl.clearColor(0.0, 0.0, 0.0, 1.0);
-    //gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    
     //drawScreenTexture();
     //drawScreenFillingGeometry(shaderProgramScrFillTexturePass);
-    renderScrFillTexture(textureSceneBuffer);
+    renderScrFillTexture(textureRhombiBlurBuffer);
 
     gl.viewport(3*gl.viewportWidth/4, 3*gl.viewportHeight/4, gl.viewportWidth/4, gl.viewportHeight/4);
     //renderScrFillTexture(textureSceneBuffer);
     drawLinearDepth();
+
+    gl.viewport(3*gl.viewportWidth/4, 2*gl.viewportHeight/4, gl.viewportWidth/4, gl.viewportHeight/4);
+    renderScenePass(1);
+
 }
 
 function drawScene(programToDraw)
@@ -1104,9 +1111,9 @@ function renderScrFillTexture(texture) {
     gl.enable(gl.DEPTH_TEST)
 }
 
-function renderScenePass() {
-    gl.clearColor(0.0, 0.0, 0.0, 1.0);
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+function renderScenePass(enableDebugCoC) {
+    //gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    //gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     gl.useProgram(shaderProgramScenePass);
 
@@ -1130,6 +1137,8 @@ function renderScenePass() {
     shaderProgramScenePass.znearUniform = gl.getUniformLocation(shaderProgramScenePass, "uZNear");
     shaderProgramScenePass.zfarUniform = gl.getUniformLocation(shaderProgramScenePass, "uZFar");
 
+    shaderProgramScenePass.uDebugCoCUniform = gl.getUniformLocation(shaderProgramScenePass, "uDebugCoC");
+
     gl.bindBuffer(gl.ARRAY_BUFFER, screenFillingVertexPositionBuffer);
     gl.vertexAttribPointer(shaderProgramScenePass.vertexPositionAttribute, screenFillingVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
@@ -1149,7 +1158,9 @@ function renderScenePass() {
     //var focalplaneNormalized = (Math.abs(focalplane) - znear) / (zfar - znear);
 
     gl.uniform1f(shaderProgramScenePass.cocScaleUniform, CoCScale);
+
     gl.uniform1f(shaderProgramScenePass.cocBiasUniform, CoCBias);
+    //gl.uniform1f(shaderProgramScenePass.cocBiasUniform, 1.0);
 
     gl.uniform1f(shaderProgramScenePass.cocUniform, CoC);
     gl.uniform1f(shaderProgramScenePass.apertureUniform, aperture);
@@ -1157,6 +1168,8 @@ function renderScenePass() {
     gl.uniform1f(shaderProgramScenePass.focallengthUniform, focallength);
     gl.uniform1f(shaderProgramScenePass.znearUniform, myCamera.GetNearValue());
     gl.uniform1f(shaderProgramScenePass.zfarUniform, myCamera.GetFarValue());
+
+    gl.uniform1i(shaderProgramScenePass.uDebugCoCUniform, enableDebugCoC);
 
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, textureSceneBuffer);
@@ -1305,7 +1318,7 @@ function drawLinearDepth() {
     gl.vertexAttribPointer(shaderProgramLinearDepthPass.textureCoordAttribute, screenFillingTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
     gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, textureBackBuffer);
+    gl.bindTexture(gl.TEXTURE_2D, textureDepthColorBuffer);
     gl.uniform1i(shaderProgramLinearDepthPass.samplerUniform, 0);
 
     gl.uniform1f(shaderProgramLinearDepthPass.nearUniform, myCamera.GetNearValue());

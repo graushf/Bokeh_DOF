@@ -55,13 +55,13 @@ function handleKeys() {
     }
 
     if (currentlyPressedKeys[85]) {
-		if (aperture < 100) {
-			aperture += 0.05;
+		if (aperture < 5000) {
+			aperture += 0.5;
 		}
 	}
 	if (currentlyPressedKeys[74]) {
 		if (aperture > 0.05) {
-			aperture -= 0.05;
+			aperture -= 0.5;
 		}
     }
     
@@ -78,12 +78,12 @@ function handleKeys() {
     
     if (currentlyPressedKeys[79]) {
 		if (focallength < 5.0) {
-			focallength += 0.001;
+			focallength += 0.0001;
 		}
 	}
 	if (currentlyPressedKeys[76]) {
 		if (focallength > 0.001) {
-			focallength -= 0.001;
+			focallength -= 0.0001;
 		}
     }
 
