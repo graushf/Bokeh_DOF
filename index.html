@@ -393,12 +393,9 @@
 
                 colorTotal /= blurAmount;
 
-                //gl_FragColor = vec4(texture2D(uSampler, vUv).w, 0.0, 0.0, 1.0); return;
-                //gl_FragColor = vec4(texture2D(uSampler, vUv).xyz, 1.0); return;
-
-                gl_FragColor = vec4(colorTotal/4.0, clamp(blurAmount/4.0, 0.0, 1.0) * (PI/2.0));
-                    
-                gl_FragColor = vec4(texture2D(uSampler, vUv).xyz, clamp(blurAmount/4.0, 0.0, 1.0) * (PI/2.0));
+                gl_FragColor = vec4(colorTotal/1.0, clamp(blurAmount/4.0, 0.0, 1.0) * (PI/2.0));
+                //gl_FragColor = vec4(colorTotal, clamp(blurAmount/4.0, 0.0, 1.0) * (PI/2.0));                    
+                //gl_FragColor = vec4(texture2D(uSampler, vUv).xyz, clamp(blurAmount/4.0, 0.0, 1.0) * (PI/2.0));
             }
         </script>
 
@@ -502,10 +499,11 @@
 
                 //gl_FragColor = vec4((color.rgb + color2.xyz) / 2.0, 1.0); return;
                 gl_FragColor = vec4(color.rgb/3.0 + (color2.rgb / 3.0), 1.0); return;
-                gl_FragColor = vec4(outputCol, 1.0); return;
+                //gl_FragColor = vec4(outputCol, 1.0); return;
 
                 // Expose. Hacked-up for this demo
-                //gl_FragColor = vec4(1.0 - exp(-outputCol.rgb/0.6), 1.0);
+                //gl_FragColor = vec4(1.0 - exp(-outputCol.rgb/8.0), 1.0);
+                gl_FragColor = vec4(1.0 - exp(-outputCol.rgb/0.6), 1.0);
             }
 
             vec4 BlurTexture(sampler2D tex, vec2 uv, vec2 direction)
