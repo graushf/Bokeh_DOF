@@ -41,9 +41,16 @@ function drawEffectPass() {
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+
+    //gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    //gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     //drawScreenTexture();
     //drawScreenFillingGeometry(shaderProgramScrFillTexturePass);
-    renderScrFillTexture(textureRhombiBlurBuffer);
+    renderScrFillTexture(textureSceneBuffer);
+
+    gl.viewport(3*gl.viewportWidth/4, 3*gl.viewportHeight/4, gl.viewportWidth/4, gl.viewportHeight/4);
+    //renderScrFillTexture(textureSceneBuffer);
+    drawLinearDepth();
 }
 
 function drawScene(programToDraw)
@@ -1069,8 +1076,7 @@ function drawScreenFillingGeometry(programShading) {
 }
 
 function renderScrFillTexture(texture) {
-    gl.clearColor(0.0, 0.0, 0.0, 1.0);
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    gl.disable(gl.DEPTH_TEST);
 
     gl.useProgram(shaderProgramScrFillTexturePass);
 
@@ -1094,6 +1100,8 @@ function renderScrFillTexture(texture) {
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, screenFillingIndexBuffer);
     gl.drawElements(gl.TRIANGLES, screenFillingIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+    
+    gl.enable(gl.DEPTH_TEST)
 }
 
 function renderScenePass() {
@@ -1268,6 +1276,42 @@ function drawRhombiBlurPassOptimized() {
     gl.activeTexture(gl.TEXTURE1);
     gl.bindTexture(gl.TEXTURE_2D, MRTfbData.t[1]);
     gl.uniform1i(shaderProgramRhombiBlurPass.samplerDiagonalBlurUniform, 1);
+
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, screenFillingIndexBuffer);
+    gl.drawElements(gl.TRIANGLES, screenFillingIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+}
+
+function drawLinearDepth() {
+    //gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    //gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    gl.useProgram(shaderProgramLinearDepthPass);
+
+    shaderProgramLinearDepthPass.vertexPositionAttribute = gl.getAttribLocation(shaderProgramLinearDepthPass, "aVertexPosition");
+    gl.enableVertexAttribArray(shaderProgramLinearDepthPass.vertexPositionAttribute);
+
+    shaderProgramLinearDepthPass.textureCoordAttribute = gl.getAttribLocation(shaderProgramLinearDepthPass, "aTextureCoord");
+    gl.enableVertexAttribArray(shaderProgramLinearDepthPass.textureCoordAttribute);
+
+    shaderProgramLinearDepthPass.samplerUniform = gl.getUniformLocation(shaderProgramLinearDepthPass, "uSampler");
+    shaderProgramLinearDepthPass.nearUniform = gl.getUniformLocation(shaderProgramLinearDepthPass, "uNear");
+    shaderProgramLinearDepthPass.farUniform = gl.getUniformLocation(shaderProgramLinearDepthPass, "uFar");
+    shaderProgramLinearDepthPass.focalPlaneUniform = gl.getUniformLocation(shaderProgramLinearDepthPass, "uFocalPlane");
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, screenFillingVertexPositionBuffer);
+    gl.vertexAttribPointer(shaderProgramLinearDepthPass.vertexPositionAttribute, screenFillingVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, screenFillingTextureCoordBuffer);
+    gl.vertexAttribPointer(shaderProgramLinearDepthPass.textureCoordAttribute, screenFillingTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, textureBackBuffer);
+    gl.uniform1i(shaderProgramLinearDepthPass.samplerUniform, 0);
+
+    gl.uniform1f(shaderProgramLinearDepthPass.nearUniform, myCamera.GetNearValue());
+    gl.uniform1f(shaderProgramLinearDepthPass.farUniform, myCamera.GetFarValue());
+
+    gl.uniform1f(shaderProgramLinearDepthPass.focalPlaneUniform, focalplane);
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, screenFillingIndexBuffer);
     gl.drawElements(gl.TRIANGLES, screenFillingIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);

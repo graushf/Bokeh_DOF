@@ -213,6 +213,6 @@ function initShadersLinearDepth() {
 	gl.linkProgram(shaderProgramLinearDepthPass);
 
 	if (!gl.getProgramParameter(shaderProgramLinearDepthPass, gl.LINK_STATUS)) {
-		alert("Could not initalise shaders");
+		alert("Could not initialise shaders");
 	}
 }

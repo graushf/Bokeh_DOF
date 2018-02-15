@@ -49,8 +49,8 @@ function handleStatistics() {
     AngleNode.nodeValue = _AngleValue.toFixed(2);
 
     ApertureNode.nodeValue = _ApertureValue.toFixed(2);
-    focalplaneNode.nodeValue = _focalplaneValue.toFixed(3);
-    focallengthNode.nodeValue = _focallengthValue.toFixed(2) +"m";
+    focalplaneNode.nodeValue = _focalplaneValue.toFixed(3) + " world units";
+    focallengthNode.nodeValue = _focallengthValue.toFixed(2) +"meters";
 
     CoCScaleNode.nodeValue = _CoCScaleValue.toFixed(4);
     CoCBiasNode.nodeValue = _CoCBiasValue.toFixed(4);

@@ -548,6 +548,8 @@
             uniform float uNear;
             uniform float uFar;
 
+            uniform float uFocalPlane;
+
             varying vec2 vUv;
 
             float LinearizeDepth(float depth) 
@@ -557,10 +559,16 @@
             }
 
             void main(void) {
+                //gl_FragColor = vec4(texture2D(uSampler, vUv).xyz, 1.0); return;
                 float depthValue = texture2D(uSampler, vUv).x;
                 
-                float linZ = LinearizeDepth(depthValue) / uFar;
-                gl_FragColor = vec4(vec3(linZ), 1.0);
+                float linZ = LinearizeDepth(depthValue);
+
+                gl_FragColor = vec4(vec3(linZ/uFar), 1.0);
+                
+                if (linZ < uFocalPlane) {
+                    gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+                }
             }
 
         </script>
