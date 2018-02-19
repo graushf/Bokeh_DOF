@@ -45,6 +45,9 @@ var focallength = 0.020;
 var CoCScale;
 var CoCBias;
 
+// Debug CoC
+var DepthDebug = 1.0;
+
 function initGL(canvas) 
 {
     try {

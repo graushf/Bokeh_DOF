@@ -90,6 +90,18 @@ function handleKeys() {
     if (currentlyPressedKeys[16]) {
         myCamera.MovementSpeed = 0.03;
     }    
+
+    if (currentlyPressedKeys[50]) {
+        if (DepthDebug < myCamera.GetFarValue()) {
+            DepthDebug += 0.1;
+        }
+    }
+
+    if (currentlyPressedKeys[49]) {
+        if (DepthDebug > 0.1) {
+            DepthDebug -= 0.1;
+        }
+    }
 }
 
 var xoffset;

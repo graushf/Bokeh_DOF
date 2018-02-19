@@ -330,27 +330,33 @@
             uniform float uZNear;
             uniform float uZFar;
 
+            uniform float uDebugDepth;
+
             varying vec2 vUv;
 
             void main(void) {
                 vec3 scene = texture2D(uSamplerColor, vUv).rgb;
 
+                float ZBufferNonLinear = (1.0/uDebugDepth - 1.0/uZNear) / (1.0/uZFar - 1.0/uZNear);
+
                 float CoCScale = uCoCScale;
                 float CoCBias = uCoCBias;
 
-
+                
                 float depthValue = texture2D(uSamplerDepth, vUv).x;
                 //gl_FragColor = vec4(vec3(depthValue), 1.0); return;
 
 
-                float _CoC = abs(depthValue * CoCScale + CoCBias);
+                //float _CoC = abs(depthValue * CoCScale + CoCBias);
+                float _CoC = abs(ZBufferNonLinear * CoCScale + CoCBias);
 
                 if (uDebugCoC == 1) {
                     gl_FragColor = vec4(_CoC, 0.0, 0.0, 1.0); return;
                 }
 
                 //gl_FragColor = vec4(scene, uCoc * uCoc);
-                gl_FragColor = vec4(scene, _CoC * _CoC);
+                gl_FragColor = vec4(scene, _CoC);
+                //gl_FragColor = vec4(_CoC, 0.0, 0.0, 1.0);
                 //gl_FragColor = vec4(scene, 1.0);
             }
         </script>
@@ -598,9 +604,7 @@
                 <div>Focal Length (O/L): <span id="FocallengthId"></span></div>
                 <div>CoCScale: <span id="CoCScaleId"></span></div>
                 <div>CoCBias: <span id="CoCBiasId"></span></div>
+                <div id="debug-label">Depth [DEBUG] (1/2): <span id="DepthDebugId"></span></div>
             </div>
-        </div>
-        <div>
-            <h1>adios</h1>
         </div>
     </body>

@@ -26,3 +26,8 @@ body {
   	padding: 0;
     background-color: black;
 }
+
+#debug-label {
+	font-weight: bold;
+	color: #00c300;
+}

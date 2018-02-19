@@ -1139,6 +1139,9 @@ function renderScenePass(enableDebugCoC) {
 
     shaderProgramScenePass.uDebugCoCUniform = gl.getUniformLocation(shaderProgramScenePass, "uDebugCoC");
 
+    shaderProgramScenePass.uDepthDebugUniform = gl.getUniformLocation(shaderProgramScenePass, "uDebugDepth");
+
+
     gl.bindBuffer(gl.ARRAY_BUFFER, screenFillingVertexPositionBuffer);
     gl.vertexAttribPointer(shaderProgramScenePass.vertexPositionAttribute, screenFillingVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
@@ -1170,6 +1173,8 @@ function renderScenePass(enableDebugCoC) {
     gl.uniform1f(shaderProgramScenePass.zfarUniform, myCamera.GetFarValue());
 
     gl.uniform1i(shaderProgramScenePass.uDebugCoCUniform, enableDebugCoC);
+
+    gl.uniform1f(shaderProgramScenePass.uDepthDebugUniform, DepthDebug);
 
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, textureSceneBuffer);

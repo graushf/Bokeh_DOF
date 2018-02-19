@@ -1,6 +1,7 @@
 var CoCNode, AngleNode;
 var ApertureNode, focalplaneNode, focallengthNode;
 var CoCScaleNode, CoCBiasNode;
+var DepthDebugNode;
 
 function initStatistics() {
     var CoCElement = document.getElementById("CoCId");
@@ -13,6 +14,8 @@ function initStatistics() {
     var CoCScaleElement = document.getElementById("CoCScaleId");
     var CoCBiasElement = document.getElementById("CoCBiasId");
 
+    var DepthDebugElement = document.getElementById("DepthDebugId");
+
     CoCNode = document.createTextNode("");
     AngleNode = document.createTextNode("");
 
@@ -23,6 +26,8 @@ function initStatistics() {
     CoCScaleNode = document.createTextNode("");
     CoCBiasNode = document.createTextNode("");
 
+    DepthDebugNode = document.createTextNode("");
+
     CoCElement.appendChild(CoCNode);
     AngleElement.appendChild(AngleNode);
 
@@ -32,6 +37,8 @@ function initStatistics() {
 
     CoCScaleElement.appendChild(CoCScaleNode);
     CoCBiasElement.appendChild(CoCBiasNode);
+
+    DepthDebugElement.appendChild(DepthDebugNode);
 }
 
 function handleStatistics() {
@@ -45,6 +52,8 @@ function handleStatistics() {
     var _CoCScaleValue = CoCScale;
     var _CoCBiasValue = CoCBias;
 
+    var _DepthDebug = DepthDebug;
+
     CoCNode.nodeValue = _CoCValue.toFixed(2);
     AngleNode.nodeValue = _AngleValue.toFixed(2);
 
@@ -54,4 +63,6 @@ function handleStatistics() {
 
     CoCScaleNode.nodeValue = _CoCScaleValue.toFixed(4);
     CoCBiasNode.nodeValue = _CoCBiasValue.toFixed(4);
+
+    DepthDebugNode.nodeValue = _DepthDebug.toFixed(3);
 }
