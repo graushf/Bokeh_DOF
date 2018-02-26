@@ -102,6 +102,10 @@ function handleKeys() {
             DepthDebug -= 0.1;
         }
     }
+
+    if (currentlyPressedKeys[67]) {
+        debugCamera();
+    }
 }
 
 var xoffset;

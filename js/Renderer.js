@@ -26,7 +26,11 @@ function drawEffectPass() {
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, backBufferHalf);
     gl.viewport(0, 0, gl.viewportWidth/downsampleCoefficient, gl.viewportHeight/downsampleCoefficient);
-    renderDownsamplePass();
+
+    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    renderDownsamplePass(0);
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, MRTfbData.f);
 
@@ -49,14 +53,16 @@ function drawEffectPass() {
     
     //drawScreenTexture();
     //drawScreenFillingGeometry(shaderProgramScrFillTexturePass);
-    renderScrFillTexture(textureRhombiBlurBuffer);
+    renderScrFillTexture(MRTfbData.t[0]);
+    //renderDownsamplePass(0);
 
     gl.viewport(3*gl.viewportWidth/4, 3*gl.viewportHeight/4, gl.viewportWidth/4, gl.viewportHeight/4);
     //renderScrFillTexture(textureSceneBuffer);
     drawLinearDepth();
 
     gl.viewport(3*gl.viewportWidth/4, 2*gl.viewportHeight/4, gl.viewportWidth/4, gl.viewportHeight/4);
-    renderScenePass(1);
+    //renderScenePass(1);
+    renderDownsamplePass(1);
 
 }
 
@@ -1188,9 +1194,9 @@ function renderScenePass(enableDebugCoC) {
     gl.drawElements(gl.TRIANGLES, screenFillingIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 }
 
-function renderDownsamplePass() {
-    gl.clearColor(0.0, 0.0, 0.0, 1.0);
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+function renderDownsamplePass(enableDebugCoC) {
+    //gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    //gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     gl.useProgram(shaderProgramDownsamplePass);
 
@@ -1204,6 +1210,8 @@ function renderDownsamplePass() {
 
     shaderProgramDownsamplePass.invViewCoordinatesUniform = gl.getUniformLocation(shaderProgramDownsamplePass, "uInvViewDimensions");
 
+    shaderProgramDownsamplePass.uDebugCoCUniform = gl.getUniformLocation(shaderProgramDownsamplePass, "uDebugCoC");
+
     gl.bindBuffer(gl.ARRAY_BUFFER, screenFillingVertexPositionBuffer);
     gl.vertexAttribPointer(shaderProgramDownsamplePass.vertexPositionAttribute, screenFillingVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
@@ -1214,6 +1222,8 @@ function renderDownsamplePass() {
     //var invViewDimensions_y = 1.0 / 643.0;
 
     gl.uniform2f(shaderProgramDownsamplePass.invViewCoordinatesUniform, invViewDimensions_x, invViewDimensions_y);
+
+    gl.uniform1i(shaderProgramDownsamplePass.uDebugCoCUniform, enableDebugCoC);
 
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, textureBackBuffer);
@@ -1236,6 +1246,7 @@ function drawVerticalAndDiagonalBlurPass() {
     gl.enableVertexAttribArray(shaderProgramVerAndDiagBlurPass.textureCoordAttribute);
 
     shaderProgramVerAndDiagBlurPass.samplerUniform = gl.getUniformLocation(shaderProgramVerAndDiagBlurPass, "uSampler");
+    shaderProgramVerAndDiagBlurPass.samplerUniformDepth = gl.getUniformLocation(shaderProgramVerAndDiagBlurPass, "uSamplerDepth");
 
     shaderProgramVerAndDiagBlurPass.invViewCoordinatesUniform = gl.getUniformLocation(shaderProgramVerAndDiagBlurPass, "uInvViewDimensions");
 
@@ -1253,6 +1264,10 @@ function drawVerticalAndDiagonalBlurPass() {
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, textureBackBufferHalf);
     gl.uniform1i(shaderProgramVerAndDiagBlurPass.samplerUniform, 0);
+
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D,textureDepthColorBuffer);
+    gl.uniform1i(shaderProgramVerAndDiagBlurPass.samplerUniformDepth, 1);
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, screenFillingIndexBuffer);
     gl.drawElements(gl.TRIANGLES, screenFillingIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);

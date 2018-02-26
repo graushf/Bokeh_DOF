@@ -1,7 +1,7 @@
 var checkerGrayTexture;
 
 function initTextures() {
-    checkerGrayTexture = loadTexture("http://localhost/SeparableBokeh_DoF_WebGL/resources/textures/checker_grey_pot.jpg");
+    checkerGrayTexture = loadTexture("http://localhost/Bokeh_DOF/resources/textures/checker_grey_pot2.jpg");
 }
 
 function createAndSetupTexture() 

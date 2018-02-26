@@ -5,7 +5,14 @@ function initCamera() {
 	myCamera.CameraSetPos(aux, gl.viewportWidth, gl.viewportHeight);
     var _pos = vec3.fromValues(0.0, 3.55, 0.0);
     var _pitch =-7.5;
-    var _yaw = -90.0;
+	var _yaw = -90.0;
+	
+	// Debug pixel bleeding
+	_pos = vec3.fromValues(1.6340, 1.40, -4.68);
+	_pitch = -9.25;
+	_yaw = -103.25;
+
+
     myCamera.SetPositionAndDirectionCamera(_pos, _pitch, _yaw);
 	//_pos = vec3.fromValues(0.0, 0.0, 10.0);
     //_pitch = 0.0;
