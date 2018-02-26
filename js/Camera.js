@@ -8,9 +8,9 @@ function initCamera() {
 	var _yaw = -90.0;
 	
 	// Debug pixel bleeding
-	_pos = vec3.fromValues(1.6340, 1.40, -4.68);
-	_pitch = -9.25;
-	_yaw = -103.25;
+	_pos = vec3.fromValues(0.8157569766044617, 1.5960451364517212, -0.14037978649139404);
+	_pitch = -0.75;
+	_yaw = -88.75;
 
 
     myCamera.SetPositionAndDirectionCamera(_pos, _pitch, _yaw);

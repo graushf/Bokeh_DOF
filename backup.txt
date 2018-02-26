@@ -1,0 +1,126 @@
+void main(void) {
+                // Get the centre to determine the radius of the blur
+                vec4 centerColor = texture2D(uSampler, vUv);
+                float CoC = centerColor.a;
+
+
+                //float centerPixel = CoC;
+                float centerDepth = texture2D(uSamplerDepth, vUv).x;
+
+                // Compute the blur direction. Here, vertical.
+                vec2 blurDirection = CoC * uInvViewDimensions * vec2(cos(uAngle - PI/2.0), sin(uAngle - PI/2.0));
+                //vec2 blurDirection = 1.0 * uInvViewDimensions * vec2(cos(uAngle - PI/2.0), sin(uAngle - PI/2.0));
+
+                // Blur using the weights to bias it
+                vec4 color = BlurTexture(uSampler, vUv, blurDirection, centerColor, centerDepth) * 1.0;
+
+                // Compute the blur direction. Here, diagonal.
+                vec2 blurDirection2 = CoC * uInvViewDimensions * vec2(cos(uAngle + PI / 6.0), sin(uAngle + PI / 6.0));
+
+                // Blur using the weights to bias it
+                vec4 color2 = BlurTexture(uSampler, vUv, blurDirection2, centerColor, centerDepth) * CoC;
+                
+                // Output to MRT
+                gl_FragData[0] = vec4(color.xyz, CoC);
+                //gl_FragData[0] = centerColor;
+                //gl_FragData[0] = texture2D(uSamplerDepth, vUv);
+                gl_FragData[1] = vec4(color2.rgb + color.xyz, CoC);
+                //gl_FragData[1] = vec4(color2.rgb, CoC);
+            }
+
+            float LinearizeDepth(float depth) 
+            {
+                float uNear = 0.1;
+                float uFar = 2000.0;
+                float z = depth * 2.0 - 1.0; // back to NDC 
+                return (2.0 * uNear * uFar) / (uFar + uNear - z * (uFar - uNear));	
+            }
+
+            vec4 BlurTexture(sampler2D tex, vec2 uv, vec2 direction, vec4 centerColor, float centerDepth)
+            {
+                float bleedingMult = 30.0;
+                float bleedingBias = 0.02;
+
+                vec4 finalColor = vec4(0.0);
+                finalColor = centerColor;
+                finalColor = vec4(0.0, 0.0, 0.0, 1.0); // DEBUG PURPOSES
+                //return finalColor;
+                float totalWeight = 0.0;
+
+                // This offset is important
+                uv += direction * 0.5;
+
+                //return vec4(centerDepth, centerDepth, centerDepth, 1.0);
+
+                //float linZ = LinearizeDepth(centerDepth);
+                //return vec4(vec3(linZ/50.0), 1.0);
+
+                for (int i = 0; i < NUM_SAMPLES; ++i)
+                {
+                    vec2 sampleCoords = uv + direction * float(i);
+
+                    vec4 samplePixel = texture2D(tex, sampleCoords); // color
+
+                    // do the texture sampling for this sample
+                    float samplePixelDepth = texture2D(uSamplerDepth, sampleCoords).x;
+
+
+                    if (i == 0) {
+                        //vec2 sampleCoords = uv + direction * float(i);
+                        //vec4 samplePixel = texture2D(tex, sampleCoords); // color
+
+                        //float linZ = LinearizeDepth(samplePixelDepth);
+                        //return vec4(vec3(linZ/50.0), 1.0);
+
+                    }
+
+
+                    
+                    //return vec4(samplePixelDepth, samplePixelDepth, samplePixelDepth, 1.0);
+                    //float weight = samplePixel.a;
+
+                    if (samplePixelDepth < centerDepth) {
+                        //weight *= bleedingMult;
+                        //return vec4(0.0, 1.0, 0.0, 1.0);
+
+                        //return vec4(0.0, 1.0, 0.0, 1.0);
+                        samplePixel = vec4(1.0, 0.0, 0.0, 1.0);
+
+                    } else {
+                        //return vec4(0.0, 0.0, 1.0, 1.0);
+                        samplePixel = vec4(0.0, 1.0, 0.0, 1.0);
+                    }
+
+                    //if (centerColor.a > samplePixel.a) {
+
+                    //} else {
+                    //    weight = 1.0;
+                    //}
+                    //weight = clamp(weight, 0.0, 1.0);
+                    
+                    float weight = 1.0 / float(NUM_SAMPLES);
+
+                    
+
+                    finalColor += samplePixel * weight;
+                    //weight = finalColor.a;
+                    totalWeight += weight;
+
+                    //color *= weight;
+                    //weight = color.a;
+                    //blurAmount += weight;
+                    //finalColor += color;
+                }
+
+                return (finalColor / 1.0);
+
+                if (distance(centerColor, finalColor) < 0.1) {
+                    //return centerColor;
+                }
+                if (totalWeight > 0.1) {
+                    //return (finalColor / totalWeight);
+                } else {
+                    //return finalColor;
+                }
+                
+            }

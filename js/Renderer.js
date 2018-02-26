@@ -54,6 +54,8 @@ function drawEffectPass() {
     //drawScreenTexture();
     //drawScreenFillingGeometry(shaderProgramScrFillTexturePass);
     renderScrFillTexture(MRTfbData.t[0]);
+    //renderScrFillTexture(textureRhombiBlurBuffer);
+    //renderScrFillTexture(textureSceneBuffer);
     //renderDownsamplePass(0);
 
     gl.viewport(3*gl.viewportWidth/4, 3*gl.viewportHeight/4, gl.viewportWidth/4, gl.viewportHeight/4);
@@ -63,6 +65,10 @@ function drawEffectPass() {
     gl.viewport(3*gl.viewportWidth/4, 2*gl.viewportHeight/4, gl.viewportWidth/4, gl.viewportHeight/4);
     //renderScenePass(1);
     renderDownsamplePass(1);
+
+    gl.viewport(3*gl.viewportWidth/4, 1*gl.viewportHeight/4, gl.viewportWidth/4, gl.viewportHeight/4);
+    //renderScenePass(1);
+    renderDownsamplePass(0);
 
 }
 
@@ -78,7 +84,7 @@ function drawScene(programToDraw)
     
     drawSceneObjects(programToDraw);
     drawHexProducingSpheres(programToDraw);
-    drawHexProducingSpheres2(programToDraw);
+    //drawHexProducingSpheres2(programToDraw);
 }
 
 function drawSceneObjects(programToDraw) {
@@ -97,20 +103,20 @@ function drawSceneObjects(programToDraw) {
 }
 
 function drawHexProducingSpheres(programToDraw) {
-    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(0.0, 2.5, -10.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(120 *181/255, 10 * 134/255, 10 * 144/255));
-    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(4.0, 1.7, -10.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(10 * 214/255, 10 * 211/255, 10 * 218/255));
-    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(-4.0, 1.0, -10.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(10 * 242/255, 10 * 240/255, 10 * 241/255));
-    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(-4.3, 0.7, -10.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(10 * 57/255, 10 * 93/255, 10 * 109/255));
-    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(-3.4, 1.8, -8.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(10 * 62/255, 10 * 101/255, 10 * 54/255));
-    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(0.7, 0.4, -8.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(10 * 197/255, 10 * 197/255, 10 * 197/255));
-    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(-3.0, 2.0, -15.0), vec3.fromValues(0.40, 0.40, 0.40), vec3.fromValues(10 * 142/255, 10 * 90/255, 10 * 92/255));
-    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(6.0, 2.5, -20.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(10 * 83/255, 10 * 79/255, 10 * 114/255));
-    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(-5.0, 7.5, -25.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(10 * 132/255, 10 * 86/255, 10 * 133/255));
+    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(0.0, 2.5, -10.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(120 *181/255, 1* 134/255, 1* 144/255));
+    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(4.0, 1.7, -10.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(1* 214/255, 1* 211/255, 1* 218/255));
+    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(-4.0, 1.0, -10.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(1* 242/255, 1* 240/255, 1* 241/255));
+    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(-4.3, 0.7, -10.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(1* 57/255, 1* 93/255, 1* 109/255));
+    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(-3.4, 1.8, -8.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(1* 62/255, 1* 101/255, 1* 54/255));
+    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(0.7, 0.4, -8.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(1* 197/255, 1* 197/255, 1* 197/255));
+    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(-3.0, 2.0, -15.0), vec3.fromValues(0.40, 0.40, 0.40), vec3.fromValues(1* 142/255, 1* 90/255, 1* 92/255));
+    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(6.0, 2.5, -20.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(1* 83/255, 1* 79/255, 1* 114/255));
+    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(-5.0, 7.5, -25.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(1* 132/255, 1* 86/255, 1* 133/255));
     drawSphereDiffuseIntense(programToDraw, vec3.fromValues(-10.0, 5.5, -30.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(7.5 * 200/255, 2 * 80/255, 3 * 170/255));
-    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(4.0, 6.8, -25.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(10 * 40/255, 10 * 89/255, 10 * 225/255));
-    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(10.0, 6.5, -30.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(4.0 * 130/255, 10.0 * 220/255, 10.0 * 170/255));
-    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(10.0, 3.5, -20.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(10.0 * 210/255, 10.0 * 175/255, 10.0 * 57/255));
-    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(6.0, 2.5, -40.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(10.0 * 195/255, 10.0 * 68/255, 10.0 * 110/255));
+    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(4.0, 6.8, -25.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(1* 40/255, 1* 89/255, 1* 225/255));
+    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(10.0, 6.5, -30.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(1 * 130/255, 1 * 220/255, 1 * 170/255));
+    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(10.0, 3.5, -20.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(1 * 210/255, 1 * 175/255, 1 * 57/255));
+    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(6.0, 2.5, -40.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(1 * 195/255, 1 * 68/255, 1 * 110/255));
 }
 
 function drawHexProducingSpheres2(programToDraw) {
