@@ -32,6 +32,14 @@ function drawEffectPass() {
 
     renderDownsamplePass(0);
 
+    gl.bindFramebuffer(gl.FRAMEBUFFER, depthHalfColorBuffer);
+    gl.viewport(0, 0, gl.viewportWidth/downsampleCoefficient, gl.viewportHeight/downsampleCoefficient);
+    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    renderDownsampleDepthPass();
+
+
     gl.bindFramebuffer(gl.FRAMEBUFFER, MRTfbData.f);
 
     var bufferList = [
@@ -54,6 +62,8 @@ function drawEffectPass() {
     //drawScreenTexture();
     //drawScreenFillingGeometry(shaderProgramScrFillTexturePass);
     renderScrFillTexture(MRTfbData.t[0]);
+    //renderDownsamplePass(1);
+    //renderScrFillTexture(textureBackBufferHalf);
     //renderScrFillTexture(textureRhombiBlurBuffer);
     //renderScrFillTexture(textureSceneBuffer);
     //renderDownsamplePass(0);
@@ -103,7 +113,7 @@ function drawSceneObjects(programToDraw) {
 }
 
 function drawHexProducingSpheres(programToDraw) {
-    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(0.0, 2.5, -10.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(120 *181/255, 1* 134/255, 1* 144/255));
+    drawSphereDiffuseIntense(programToDraw, vec3.fromValues(0.0, 2.5, -10.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(5 *181/255, 1* 134/255, 1* 144/255));
     drawSphereDiffuseIntense(programToDraw, vec3.fromValues(4.0, 1.7, -10.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(1* 214/255, 1* 211/255, 1* 218/255));
     drawSphereDiffuseIntense(programToDraw, vec3.fromValues(-4.0, 1.0, -10.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(1* 242/255, 1* 240/255, 1* 241/255));
     drawSphereDiffuseIntense(programToDraw, vec3.fromValues(-4.3, 0.7, -10.0), vec3.fromValues(0.25, 0.25, 0.25), vec3.fromValues(1* 57/255, 1* 93/255, 1* 109/255));
@@ -1351,6 +1361,31 @@ function drawLinearDepth() {
     gl.uniform1f(shaderProgramLinearDepthPass.farUniform, myCamera.GetFarValue());
 
     gl.uniform1f(shaderProgramLinearDepthPass.focalPlaneUniform, focalplane);
+
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, screenFillingIndexBuffer);
+    gl.drawElements(gl.TRIANGLES, screenFillingIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+}
+
+function renderDownsampleDepthPass() {
+    gl.useProgram(shaderProgramDownsampledDepthPass);
+
+    shaderProgramDownsampledDepthPass.vertexPositionAttribute = gl.getAttribLocation(shaderProgramDownsampledDepthPass, "aVertexPosition");
+    gl.enableVertexAttribArray(shaderProgramDownsampledDepthPass.vertexPositionAttribute);
+
+    shaderProgramDownsampledDepthPass.textureCoordAttribute = gl.getAttribLocation(shaderProgramDownsampledDepthPass, "aTextureCoord");
+    gl.enableVertexAttribArray(shaderProgramDownsampledDepthPass.textureCoordAttribute);
+
+    shaderProgramDownsampledDepthPass.samplerUniform = gl.getUniformLocation(shaderProgramDownsampledDepthPass, "uSamplerDepth");
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, screenFillingVertexPositionBuffer);
+    gl.vertexAttribPointer(shaderProgramDownsampledDepthPass.vertexPositionAttribute, screenFillingVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, screenFillingTextureCoordBuffer);
+    gl.vertexAttribPointer(shaderProgramDownsampledDepthPass.textureCoordAttribute, screenFillingTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, textureDepthColorBuffer);
+    gl.uniform1i(shaderProgramDownsampledDepthPass.samplerUniform, 0);
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, screenFillingIndexBuffer);
     gl.drawElements(gl.TRIANGLES, screenFillingIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);

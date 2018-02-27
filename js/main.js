@@ -32,6 +32,8 @@ var rhombiBlurBuffer;
 var textureRhombiBlurBuffer;
 var depthColorBuffer;
 var textureDepthColorBuffer;
+var depthHalfColorBuffer;
+var textureDepthHalfColorBuffer;
 
 // MRT render targets optimization
 var MRTfbData;
