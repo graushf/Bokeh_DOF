@@ -315,17 +315,42 @@
             precision mediump float;
 
             uniform sampler2D uSamplerDepth;
+            uniform vec2 uInvViewDimensions;
 
             varying vec2 vUv;
+
+            float LinearizeDepth(float depth) 
+            {
+                float z = depth * 2.0 - 1.0; // back to NDC 
+                float uNear = 0.1;
+                float uFar = 2000.0;
+                return (2.0 * uNear * uFar) / (uFar + uNear - z * (uFar - uNear));	
+            }
+
 
             void main(void) {
                 vec3 col = texture2D(uSamplerDepth, vUv).rgb;
 
-                //vec4 coc;
-                //coc.x = texture2D(uSampler, vUv).w;
-                //coc.y = texture2D(uSampler, vUv + vec2(uInvViewDimensions.x, 0.0)).w;
-                //coc.z = texture2D(uSampler, vUv + vec2(0.0, uInvViewDimensions.y)).w;
-                //coc.w = texture2D(uSampler, vUv + vec2(uInvViewDimensions.x, uInvViewDimensions.y)).w;
+                float depthValue = col.x;
+
+                float linZ = LinearizeDepth(depthValue);
+
+                col = vec3(linZ/50.0);
+
+                vec4 depthSamples;
+                depthSamples.x = texture2D(uSamplerDepth, vUv).x;
+                depthSamples.y = texture2D(uSamplerDepth, vUv + vec2(uInvViewDimensions.x, 0.0)).x;
+                depthSamples.z = texture2D(uSamplerDepth, vUv + vec2(0.0, uInvViewDimensions.y)).x;
+                depthSamples.w = texture2D(uSamplerDepth, vUv + vec2(uInvViewDimensions.x, uInvViewDimensions.y)).x;
+
+                float minDepth = depthSamples.x;
+                minDepth = min(minDepth, depthSamples.y);
+                minDepth = min(minDepth, depthSamples.z);
+                minDepth = min(minDepth, depthSamples.w);
+
+                linZ = LinearizeDepth(minDepth);
+
+                col = vec3(linZ/50.0);
 
                 gl_FragColor = vec4(col, 1.0);
             }
