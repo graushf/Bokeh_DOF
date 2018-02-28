@@ -61,8 +61,8 @@ function drawEffectPass() {
     
     //drawScreenTexture();
     //drawScreenFillingGeometry(shaderProgramScrFillTexturePass);
-    //renderScrFillTexture(MRTfbData.t[0]);
-    renderScrFillTexture(textureDepthHalfColorBuffer);
+    renderScrFillTexture(MRTfbData.t[0]);
+    //renderScrFillTexture(textureDepthHalfColorBuffer);
     //renderDownsamplePass(1);
     //renderScrFillTexture(textureBackBufferHalf);
     //renderScrFillTexture(textureRhombiBlurBuffer);
@@ -1289,7 +1289,7 @@ function drawVerticalAndDiagonalBlurPass() {
     gl.uniform1i(shaderProgramVerAndDiagBlurPass.samplerUniform, 0);
 
     gl.activeTexture(gl.TEXTURE1);
-    gl.bindTexture(gl.TEXTURE_2D,textureDepthColorBuffer);
+    gl.bindTexture(gl.TEXTURE_2D, textureDepthHalfColorBuffer);
     gl.uniform1i(shaderProgramVerAndDiagBlurPass.samplerUniformDepth, 1);
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, screenFillingIndexBuffer);

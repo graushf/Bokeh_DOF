@@ -343,14 +343,20 @@
                 depthSamples.z = texture2D(uSamplerDepth, vUv + vec2(0.0, uInvViewDimensions.y)).x;
                 depthSamples.w = texture2D(uSamplerDepth, vUv + vec2(uInvViewDimensions.x, uInvViewDimensions.y)).x;
 
+                float sumDepth = dot(depthSamples, vec4(1.0));
+
+
                 float minDepth = depthSamples.x;
                 minDepth = min(minDepth, depthSamples.y);
                 minDepth = min(minDepth, depthSamples.z);
                 minDepth = min(minDepth, depthSamples.w);
 
+                minDepth = sumDepth/4.0;
+
                 linZ = LinearizeDepth(minDepth);
 
                 col = vec3(linZ/50.0);
+                //col = vec3(minDepth);
 
                 gl_FragColor = vec4(col, 1.0);
             }
@@ -490,6 +496,8 @@
                 
                 // Output to MRT
                 gl_FragData[0] = vec4(color.xyz, CoC);
+                //gl_FragData[0] = texture2D(uSampler, vUv);
+                //gl_FragData[0] = texture2D(uSamplerDepth, vUv);
                 gl_FragData[1] = vec4(color2.rgb + color.xyz, CoC);
             }
 
@@ -526,7 +534,7 @@
                             //samplePixel.xyz = vec3(0.0, 0.0, 0.0);
                         //}
 
-                        //weight = 0.00001;
+                        weight = 0.00001;
                     } else if (samplePixelDepth > centerDepth) {
                         //samplePixel.xyz = vec3(0.0, 1.0, 0.0);
                     } else if (samplePixelDepth == centerDepth) {
