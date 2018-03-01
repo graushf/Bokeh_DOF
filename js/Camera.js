@@ -12,6 +12,10 @@ function initCamera() {
 	_pitch = -0.75;
 	_yaw = -88.75;
 
+	_pos = vec3.fromValues(0.12777182459831238, 0.7068310379981995, -5.5712175369262695);
+	_pitch = -6.25;
+	_yaw = -92.5;
+
 
     myCamera.SetPositionAndDirectionCamera(_pos, _pitch, _yaw);
 	//_pos = vec3.fromValues(0.0, 0.0, 10.0);

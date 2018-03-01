@@ -351,12 +351,17 @@
                 minDepth = min(minDepth, depthSamples.z);
                 minDepth = min(minDepth, depthSamples.w);
 
-                minDepth = sumDepth/4.0;
+                float d = sumDepth/4.0;
 
                 linZ = LinearizeDepth(minDepth);
 
-                col = vec3(linZ/50.0);
-                //col = vec3(minDepth);
+                float linZ2 = LinearizeDepth(d);
+
+
+
+
+                //col = vec3(linZ2/50.0);
+                col = vec3(minDepth);
 
                 gl_FragColor = vec4(col, 1.0);
             }
@@ -475,12 +480,22 @@
             // function prototypes
             vec4 BlurTexture(sampler2D tex, vec2 uv, vec2 direction, float centerCoC, float centerDepth);
 
+            float LinearizeDepth(float depth) 
+            {
+                float z = depth * 2.0 - 1.0; // back to NDC 
+                float uNear = 0.1;
+                float uFar = 2000.0;
+                return (2.0 * uNear * uFar) / (uFar + uNear - z * (uFar - uNear));	
+            }
+
             void main(void) {
                 // Get the centre to determine the radius of the blur
                 vec4 centerColor = texture2D(uSampler, vUv);
+                centerColor.a = clamp(centerColor.a, 0.0, 1.0) * (PI/2.0);
                 float CoC = centerColor.a;
                 float centerDepth = texture2D(uSamplerDepth, vUv).x;
 
+                float linZ = LinearizeDepth(centerDepth);
 
                 // Compute the blur direction. Here, vertical.
                 vec2 blurDirection = CoC * uInvViewDimensions * vec2(cos(uAngle - PI/2.0), sin(uAngle - PI/2.0));
@@ -496,8 +511,10 @@
                 
                 // Output to MRT
                 gl_FragData[0] = vec4(color.xyz, CoC);
+                //gl_FragData[0] = vec4(CoC, 0.0, 0.0, 1.0);
                 //gl_FragData[0] = texture2D(uSampler, vUv);
                 //gl_FragData[0] = texture2D(uSamplerDepth, vUv);
+                //gl_FragData[0] = vec4(vec3(linZ/100.0), 1.0);
                 gl_FragData[1] = vec4(color2.rgb + color.xyz, CoC);
             }
 
@@ -506,10 +523,20 @@
                 vec4 finalColor = vec4(0.0);
                 float blurAmount = 0.0;
 
+                float bleedingMult = 30.0;
+                //bleedingMult = 60.0;
+                //bleedingMult = 120.0;
+                //bleedingMult = 240.0;
+                //bleedingMult = 480.0;
+                //bleedingMult = 960.0;
+                //bleedingMult = 1920.0;
+                //bleedingMult = 7680.0;
+                //bleedingMult = 15360.0;
+
                 // This offset is important. Prevents edge overlaps.
                 uv += direction * 0.5;
                 
-                // i = 0, i = 3, i = 7, i = 11, i = 15
+                // i = 1, i = 4, i = 8, i = 12, i = 16
                 for (int i = 0; i < 16; ++i)
                 {
                     vec2 sampleCoords = uv + direction * float(i);
@@ -517,8 +544,9 @@
                     vec4 samplePixel  = texture2D(tex, sampleCoords);
                     vec3 col = samplePixel.xyz;
                     float samplePixelDepth = texture2D(uSamplerDepth, sampleCoords).x;
+                    float samplePixelCoC = clamp(samplePixel.a, 0.0, 1.0) * (PI/2.0);
 
-                    float weight      = samplePixel.a;
+                    float weight = samplePixelCoC;
 
                     if (samplePixelDepth < centerDepth) {
                         //samplePixel.xyz = vec3(1.0, 0.0, 0.0);
@@ -534,7 +562,8 @@
                             //samplePixel.xyz = vec3(0.0, 0.0, 0.0);
                         //}
 
-                        weight = 0.00001;
+                        //weight = 0.00001;
+                        //weight = weight * bleedingMult;
                     } else if (samplePixelDepth > centerDepth) {
                         //samplePixel.xyz = vec3(0.0, 1.0, 0.0);
                     } else if (samplePixelDepth == centerDepth) {
@@ -613,8 +642,9 @@
                     vec2 sampleCoords = uv + direction * float(i);
 
                     vec4 samplePixel = texture2D(tex, sampleCoords);
+                    float samplePixelCoC = clamp(samplePixel.a, 0.0, 1.0) * (PI/2.0);
 
-                    float weight      = samplePixel.a;
+                    float weight = samplePixelCoC;
 
                     samplePixel      *= weight;
                     blurAmount       += weight;

@@ -24,23 +24,24 @@ function drawEffectPass() {
     //renderScrFillTexture(textureSceneBuffer);
     renderScenePass(0);
 
-    gl.bindFramebuffer(gl.FRAMEBUFFER, backBufferHalf);
-    gl.viewport(0, 0, gl.viewportWidth/downsampleCoefficient, gl.viewportHeight/downsampleCoefficient);
+    //gl.bindFramebuffer(gl.FRAMEBUFFER, backBufferHalf);
+    //gl.viewport(0, 0, gl.viewportWidth/downsampleCoefficient, gl.viewportHeight/downsampleCoefficient);
 
-    gl.clearColor(0.0, 0.0, 0.0, 1.0);
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    //gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    //gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    renderDownsamplePass(0);
+    //renderDownsamplePass(0);
 
-    gl.bindFramebuffer(gl.FRAMEBUFFER, depthHalfColorBuffer);
-    gl.viewport(0, 0, gl.viewportWidth/downsampleCoefficient, gl.viewportHeight/downsampleCoefficient);
-    gl.clearColor(0.0, 0.0, 0.0, 1.0);
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    //gl.bindFramebuffer(gl.FRAMEBUFFER, depthHalfColorBuffer);
+    //gl.viewport(0, 0, gl.viewportWidth/downsampleCoefficient, gl.viewportHeight/downsampleCoefficient);
+    //gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    //gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    renderDownsampleDepthPass();
+    //renderDownsampleDepthPass();
 
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, MRTfbData.f);
+    gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 
     var bufferList = [
         ext3.COLOR_ATTACHMENT0_WEBGL,
@@ -61,6 +62,8 @@ function drawEffectPass() {
     
     //drawScreenTexture();
     //drawScreenFillingGeometry(shaderProgramScrFillTexturePass);
+    //renderScrFillTexture(textureBackBuffer);
+    //drawLinearDepth();
     renderScrFillTexture(MRTfbData.t[0]);
     //renderScrFillTexture(textureDepthHalfColorBuffer);
     //renderDownsamplePass(1);
@@ -1278,18 +1281,22 @@ function drawVerticalAndDiagonalBlurPass() {
     gl.bindBuffer(gl.ARRAY_BUFFER, screenFillingTextureCoordBuffer);
     gl.vertexAttribPointer(shaderProgramVerAndDiagBlurPass.textureCoordAttribute, screenFillingTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-    var invViewDimensionsDownsampleFixed_x = 1.0 / (gl.viewportWidth / downsampleCoefficient);
-    var invViewDimensionsDownsampleFixed_y = 1.0 / (gl.viewportHeight / downsampleCoefficient);
+    var _downsampleCoefficient = 1.0;
+
+    var invViewDimensionsDownsampleFixed_x = 1.0 / (gl.viewportWidth / _downsampleCoefficient);
+    var invViewDimensionsDownsampleFixed_y = 1.0 / (gl.viewportHeight / _downsampleCoefficient);
 
     gl.uniform2f(shaderProgramVerAndDiagBlurPass.invViewCoordinatesUniform, invViewDimensionsDownsampleFixed_x, invViewDimensionsDownsampleFixed_y);
     gl.uniform1f(shaderProgramVerAndDiagBlurPass.angleUniform, Angle);
 
     gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, textureBackBufferHalf);
+    //gl.bindTexture(gl.TEXTURE_2D, textureBackBufferHalf);
+    gl.bindTexture(gl.TEXTURE_2D, textureBackBuffer);
     gl.uniform1i(shaderProgramVerAndDiagBlurPass.samplerUniform, 0);
 
     gl.activeTexture(gl.TEXTURE1);
-    gl.bindTexture(gl.TEXTURE_2D, textureDepthHalfColorBuffer);
+    //gl.bindTexture(gl.TEXTURE_2D, textureDepthHalfColorBuffer);
+    gl.bindTexture(gl.TEXTURE_2D, textureDepthColorBuffer);
     gl.uniform1i(shaderProgramVerAndDiagBlurPass.samplerUniformDepth, 1);
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, screenFillingIndexBuffer);
@@ -1322,8 +1329,8 @@ function drawRhombiBlurPassOptimized() {
     //var invViewDimensions_x = 1.0 / 789.0;
     //var invViewDimensions_y = 1.0 / 643.0;
 
-    var invViewDimensionsDownsampleFixed_x = 1.0 / (gl.viewportWidth / downsampleCoefficient);
-    var invViewDimensionsDownsampleFixed_y = 1.0 / (gl.viewportHeight / downsampleCoefficient);
+    var invViewDimensionsDownsampleFixed_x = 1.0 / (gl.viewportWidth / 1.0);
+    var invViewDimensionsDownsampleFixed_y = 1.0 / (gl.viewportHeight / 1.0);
 
     gl.uniform2f(shaderProgramRhombiBlurPass.invViewCoordinatesUniform, invViewDimensionsDownsampleFixed_x, invViewDimensionsDownsampleFixed_y);
     gl.uniform1f(shaderProgramRhombiBlurPass.angleUniform, Angle);
