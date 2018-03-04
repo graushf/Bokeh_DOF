@@ -1275,6 +1275,8 @@ function drawVerticalAndDiagonalBlurPass() {
 
     shaderProgramVerAndDiagBlurPass.angleUniform = gl.getUniformLocation(shaderProgramVerAndDiagBlurPass, "uAngle");
 
+    shaderProgramVerAndDiagBlurPass.focalPlaneUniform = gl.getUniformLocation(shaderProgramVerAndDiagBlurPass, "uFocalPlane");
+
     gl.bindBuffer(gl.ARRAY_BUFFER, screenFillingVertexPositionBuffer);
     gl.vertexAttribPointer(shaderProgramVerAndDiagBlurPass.vertexPositionAttribute, screenFillingVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
@@ -1288,6 +1290,8 @@ function drawVerticalAndDiagonalBlurPass() {
 
     gl.uniform2f(shaderProgramVerAndDiagBlurPass.invViewCoordinatesUniform, invViewDimensionsDownsampleFixed_x, invViewDimensionsDownsampleFixed_y);
     gl.uniform1f(shaderProgramVerAndDiagBlurPass.angleUniform, Angle);
+
+    gl.uniform1f(shaderProgramVerAndDiagBlurPass.focalPlaneUniform, focalplane);
 
     gl.activeTexture(gl.TEXTURE0);
     //gl.bindTexture(gl.TEXTURE_2D, textureBackBufferHalf);

@@ -472,6 +472,8 @@
             uniform sampler2D uSampler;
             uniform sampler2D uSamplerDepth;
 
+            uniform float uFocalPlane;
+
             uniform vec2 uInvViewDimensions;
             uniform float uAngle;
 
@@ -491,14 +493,15 @@
             void main(void) {
                 // Get the centre to determine the radius of the blur
                 vec4 centerColor = texture2D(uSampler, vUv);
-                centerColor.a = clamp(centerColor.a, 0.0, 1.0) * (PI/2.0);
+                centerColor.a = clamp(centerColor.a, 0.0, 1.0) * (1.0);
                 float CoC = centerColor.a;
+                CoC = clamp(CoC, 0.0, 1.0) * PI/2.0;
                 float centerDepth = texture2D(uSamplerDepth, vUv).x;
 
                 float linZ = LinearizeDepth(centerDepth);
 
                 // Compute the blur direction. Here, vertical.
-                vec2 blurDirection = CoC * uInvViewDimensions * vec2(cos(uAngle - PI/2.0), sin(uAngle - PI/2.0));
+                vec2 blurDirection = uInvViewDimensions * vec2(cos(uAngle - PI/2.0), sin(uAngle - PI/2.0));
 
                 // Blur using the weights to bias it
                 vec4 color = BlurTexture(uSampler, vUv, blurDirection, CoC, centerDepth) * 1.0;
@@ -515,29 +518,25 @@
                 //gl_FragData[0] = texture2D(uSampler, vUv);
                 //gl_FragData[0] = texture2D(uSamplerDepth, vUv);
                 //gl_FragData[0] = vec4(vec3(linZ/100.0), 1.0);
+                //if (linZ < uFocalPlane) {
+                //    gl_FragData[0] = vec4(1.0, 0.0, 0.0, 1.0);
+                //}
+
                 gl_FragData[1] = vec4(color2.rgb + color.xyz, CoC);
             }
 
             vec4 BlurTexture(sampler2D tex, vec2 uv, vec2 direction, float centerCoC, float centerDepth)
             {
-                vec4 finalColor = vec4(0.0);
+                float linCenterDepth = LinearizeDepth(centerDepth);
+
+                vec4 finalColor = vec4(0.0, 0.0, 0.0, centerCoC);
                 float blurAmount = 0.0;
 
-                float bleedingMult = 30.0;
-                //bleedingMult = 60.0;
-                //bleedingMult = 120.0;
-                //bleedingMult = 240.0;
-                //bleedingMult = 480.0;
-                //bleedingMult = 960.0;
-                //bleedingMult = 1920.0;
-                //bleedingMult = 7680.0;
-                //bleedingMult = 15360.0;
-
                 // This offset is important. Prevents edge overlaps.
-                uv += direction * 0.5;
+                //uv += direction * 0.5;
                 
                 // i = 1, i = 4, i = 8, i = 12, i = 16
-                for (int i = 0; i < 16; ++i)
+                for (int i = 0; i < 8; ++i)
                 {
                     vec2 sampleCoords = uv + direction * float(i);
                     
@@ -550,35 +549,81 @@
 
                     if (samplePixelDepth < centerDepth) {
                         //samplePixel.xyz = vec3(1.0, 0.0, 0.0);
-                        if (abs(samplePixel.a - centerCoC) > 0.6) {
-                            //samplePixel.xyz = vec3(1.0, 1.0, 0.0);
-                            //weight = 0.0;
-                        } 
-                        //if (samplePixel.a < 0.50) {
-                        //    samplePixel.xyz = vec3(0.0, 0.0, 0.0);
-                        //} 
-
-                        //if (samplePixel.a < centerCoC) {
-                            //samplePixel.xyz = vec3(0.0, 0.0, 0.0);
-                        //}
-
-                        //weight = 0.00001;
-                        //weight = weight * bleedingMult;
+                        
                     } else if (samplePixelDepth > centerDepth) {
                         //samplePixel.xyz = vec3(0.0, 1.0, 0.0);
                     } else if (samplePixelDepth == centerDepth) {
                         //samplePixel.xyz = vec3(0.0, 0.0, 1.0);
                     }
 
-                    //samplePixel.xyz = col;
-                                        
-                    //float weight      = 1.0/float(NUM_SAMPLES);
-                    samplePixel      *= weight;
+                    float stepDistance = length(direction * float(i));
+
+                    bool blurNear = (linCenterDepth < uFocalPlane);
+                    float linSamplePixelDepth = LinearizeDepth(samplePixelDepth);
+
+                   
+
+                    if (samplePixelCoC > stepDistance) {
+                        weight = samplePixelCoC;
+
+                        if (blurNear) {
+                            samplePixel.xyz = vec3(0.0, 1.0, 0.0);
+                            if (linSamplePixelDepth > linCenterDepth) {
+                                weight = 0.0;
+                            }
+                        }
+
+                        if (centerCoC < 0.15) {
+                            //samplePixel.xyz = vec3(0.0, 1.0, 0.0);
+                             
+                            if (samplePixelDepth < centerDepth) {
+                                //samplePixel.xyz = vec3(0.0, 0.0, 1.0);
+                                weight = 1.0;
+                            }
+
+                            //weight = 0.0;
+                            if (samplePixelDepth > centerDepth) {
+                                weight = 0.0;
+                            }
+                        }
+
+                        if ((samplePixelDepth < centerDepth)) {
+                            //samplePixel.xyz = vec3 (1.0, 0.0, 0.0);
+
+                            if (samplePixelCoC < 0.20) {
+                                //weight = 0.0;
+                            }
+                        }
+
+                        if (samplePixelCoC < 0.15) {
+                            //samplePixel.xyz = vec3(0.0, 1.0, 0.0);
+                        }
+
+                        
+                    } else {
+                        weight = 0.0;
+                        if (i == 0 ) {
+                            //weight = 1.0;
+                        }
+                    }
+
+                    //if (centerCoC < 0.15)  {
+                    //    weight = 0.0;
+                    //}
+
+                    if (i == 0) {
+                        weight = 1.0;
+                    }
+
+
+                    //weight = 1.0/float(NUM_SAMPLES);
+                    samplePixel.xyz  *= weight;
                     blurAmount       += weight;
                     finalColor       += samplePixel;
                 }
 
-                return (finalColor / blurAmount);
+                finalColor.xyz = (finalColor.xyz / blurAmount);
+                return finalColor;
             }
         </script>
 
