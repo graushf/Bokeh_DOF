@@ -1,7 +1,7 @@
 var CoCNode, AngleNode;
 var ApertureNode, focalplaneNode, focallengthNode;
 var CoCScaleNode, CoCBiasNode;
-var DepthDebugNode;
+
 
 function initStatistics() {
     var CoCElement = document.getElementById("CoCId");
@@ -14,7 +14,9 @@ function initStatistics() {
     var CoCScaleElement = document.getElementById("CoCScaleId");
     var CoCBiasElement = document.getElementById("CoCBiasId");
 
-    var DepthDebugElement = document.getElementById("DepthDebugId");
+    //var DepthDebugElement = document.getElementById("DepthDebugId");
+    var NearFocusDistanceElement = document.getElementById("NearFocusDistanceId");
+    var FarFocusDistanceElement = document.getElementById("FarFocusDistanceId");
 
     CoCNode = document.createTextNode("");
     AngleNode = document.createTextNode("");
@@ -26,7 +28,8 @@ function initStatistics() {
     CoCScaleNode = document.createTextNode("");
     CoCBiasNode = document.createTextNode("");
 
-    DepthDebugNode = document.createTextNode("");
+    NearFocusdDistanceNode = document.createTextNode("");
+    FarFocusDistanceNode = document.createTextNode("");
 
     CoCElement.appendChild(CoCNode);
     AngleElement.appendChild(AngleNode);
@@ -38,7 +41,8 @@ function initStatistics() {
     CoCScaleElement.appendChild(CoCScaleNode);
     CoCBiasElement.appendChild(CoCBiasNode);
 
-    DepthDebugElement.appendChild(DepthDebugNode);
+    NearFocusDistanceElement.appendChild(NearFocusdDistanceNode);
+    FarFocusDistanceElement.appendChild(FarFocusDistanceNode);
 }
 
 function handleStatistics() {
@@ -54,6 +58,9 @@ function handleStatistics() {
 
     var _DepthDebug = DepthDebug;
 
+    var _NearFocusDistance = nearFocusDistance;
+    var _FarFocusDistance = farFocusDistance;
+
     CoCNode.nodeValue = _CoCValue.toFixed(2);
     AngleNode.nodeValue = _AngleValue.toFixed(2);
 
@@ -64,5 +71,6 @@ function handleStatistics() {
     CoCScaleNode.nodeValue = _CoCScaleValue.toFixed(4);
     CoCBiasNode.nodeValue = _CoCBiasValue.toFixed(4);
 
-    DepthDebugNode.nodeValue = _DepthDebug.toFixed(3);
+    NearFocusdDistanceNode.nodeValue = _NearFocusDistance.toFixed(3);
+    FarFocusDistanceNode.nodeValue = _FarFocusDistance.toFixed(3);
 }

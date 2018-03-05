@@ -92,16 +92,28 @@ function handleKeys() {
     }    
 
     if (currentlyPressedKeys[50]) {
-        if (DepthDebug < myCamera.GetFarValue()) {
-            DepthDebug += 0.1;
+        if (nearFocusDistance < farFocusDistance - 0.1) {
+            nearFocusDistance+= 0.1;
         }
     }
 
     if (currentlyPressedKeys[49]) {
-        if (DepthDebug > 0.1) {
-            DepthDebug -= 0.1;
+        if ( nearFocusDistance > 0.1) {
+            nearFocusDistance -= 0.1;
         }
     }
+
+    if (currentlyPressedKeys[51]) {
+        if (farFocusDistance > nearFocusDistance + 0.1) {
+            farFocusDistance -= 0.1;
+        }
+    }
+    
+    if (currentlyPressedKeys[52]) {
+        farFocusDistance += 0.1;
+    }
+
+
 
     if (currentlyPressedKeys[67]) {
         debugCamera();

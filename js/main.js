@@ -35,6 +35,12 @@ var textureDepthColorBuffer;
 var depthHalfColorBuffer;
 var textureDepthHalfColorBuffer;
 
+var nearFocusBuffer;
+var textureNearFocusBuffer;
+var farFocusBuffer;
+var textureFarFocusBuffer;
+
+
 // MRT render targets optimization
 var MRTfbData;
 
@@ -47,6 +53,10 @@ focalplane = 3.95;
 var focallength = 0.020;
 var CoCScale;
 var CoCBias;
+
+// Three way DoF
+var nearFocusDistance = 5.0;
+var farFocusDistance = 15.0;
 
 // Debug CoC
 var DepthDebug = 1.0;

@@ -27,7 +27,7 @@ body {
     background-color: black;
 }
 
-#debug-label {
+.debug-label {
 	font-weight: bold;
 	color: #00c300;
 }

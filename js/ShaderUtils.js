@@ -9,6 +9,8 @@ var shaderProgramDepthPass;
 var shaderProgramDepthPassBackground;
 var shaderProgramLinearDepthPass;
 var shaderProgramDownsampledDepthPass;
+var shaderProgramDebugFocusPlanes;
+var shaderProgramCompositionDOF;
 
 function getShader(gl, id) 
 {
@@ -60,6 +62,9 @@ function setupShadersScene()
 	initShadersDepthPassBackground();
 	initShadersLinearDepth();
 	initShadersDownsampledDepthPass();
+	initShadersDebugFocusPlanes();
+
+	initShadersCompositionDOFPass();
 }
 
 function initShaderBasic() 
@@ -219,6 +224,20 @@ function initShadersLinearDepth() {
 	}
 }
 
+function initShadersDebugFocusPlanes() {
+	var fragmentShader = getShader(gl, "debufFocusPlanes-fs");
+	var vertexShader = getShader(gl, "screenFillingTexture-vs");
+
+	shaderProgramDebugFocusPlanes = gl.createProgram();
+	gl.attachShader(shaderProgramDebugFocusPlanes, vertexShader);
+	gl.attachShader(shaderProgramDebugFocusPlanes, fragmentShader);
+	gl.linkProgram(shaderProgramDebugFocusPlanes);
+
+	if (!gl.getProgramParameter(shaderProgramDebugFocusPlanes, gl.LINK_STATUS)) {
+		alert("Could not initialise shaders");
+	}
+}
+
 function initShadersDownsampledDepthPass() {
 	var fragmentShader = getShader(gl, "drawDownsampleDepthPass-fs");
 	var vertexShader = getShader(gl, "screenFillingTexture-vs");
@@ -229,6 +248,20 @@ function initShadersDownsampledDepthPass() {
 	gl.linkProgram(shaderProgramDownsampledDepthPass);
 
 	if (!gl.getProgramParameter(shaderProgramDownsampledDepthPass, gl.LINK_STATUS)) {
+		alert("Could not initialise the shaders");
+	}
+}
+
+function initShadersCompositionDOFPass() {
+	var fragmentShader = getShader(gl, "DOFComposition-fs");
+	var vertexShader = getShader(gl, "screenFillingTexture-vs");
+
+	shaderProgramCompositionDOF = gl.createProgram();
+	gl.attachShader(shaderProgramCompositionDOF, vertexShader);
+	gl.attachShader(shaderProgramCompositionDOF, fragmentShader);
+	gl.linkProgram(shaderProgramCompositionDOF);
+
+	if (!gl.getProgramParameter(shaderProgramCompositionDOF, gl.LINK_STATUS)) {
 		alert("Could not initialise the shaders");
 	}
 }
