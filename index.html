@@ -370,6 +370,8 @@
         <script id="scenePass-fs" type="x-shader/x-fragment">
             precision mediump float;
 
+            #define PI 3.14159265322
+
             uniform sampler2D uSamplerColor;
             uniform sampler2D uSamplerDepth;
 
@@ -403,13 +405,13 @@
                 //gl_FragColor = vec4(vec3(depthValue), 1.0); return;
 
 
-                float _CoC = abs(depthValue * CoCScale + CoCBias); // Per-Pixel CoC size dependent on camera parameters
+                float _CoC = (depthValue * CoCScale) + CoCBias; // Per-Pixel CoC size dependent on camera parameters
 
                 if (uDebugCoC == 1) {
                     gl_FragColor = vec4(_CoC, 0.0, 0.0, 1.0); return;
                 }
-
-                gl_FragColor = vec4(scene, _CoC * _CoC); // Returns scene colour and CoC as .a channel
+                _CoC = clamp(_CoC, 0.0, 1.0) * PI/2.0;
+                gl_FragColor = vec4(scene, _CoC); // Returns scene colour and CoC as .a channel
             }
         </script>
 
@@ -482,6 +484,8 @@
             // function prototypes
             vec4 BlurTexture(sampler2D tex, vec2 uv, vec2 direction, float centerCoC, float centerDepth);
 
+            float GatherAndApply(sampler2D tex, vec2 uv, float baseCoC, vec4 currCol, float stepDistance, inout vec4 outCol);
+
             float LinearizeDepth(float depth) 
             {
                 float z = depth * 2.0 - 1.0; // back to NDC 
@@ -492,28 +496,64 @@
 
             void main(void) {
                 // Get the centre to determine the radius of the blur
-                vec4 centerColor = texture2D(uSampler, vUv);
-                centerColor.a = clamp(centerColor.a, 0.0, 1.0) * (1.0);
-                float CoC = centerColor.a;
-                CoC = clamp(CoC, 0.0, 1.0) * PI/2.0;
-                float centerDepth = texture2D(uSamplerDepth, vUv).x;
+                vec4 baseColour = texture2D(uSampler, vUv);
+                //baseColour.w = clamp(baseColour.w, 0.0, 1.0) * PI/2.0;
 
-                float linZ = LinearizeDepth(centerDepth);
+                //centerColor.a = clamp(centerColor.a, 0.0, 1.0) * (1.0);
+                //float CoC = centerColor.a;
+                //CoC = clamp(CoC, 0.0, 1.0) * PI/2.0;
+                //float centerDepth = texture2D(uSamplerDepth, vUv).x;
+
+                //float linZ = LinearizeDepth(centerDepth);
+
+
+                vec4 mrt_col0 = vec4(0.0, 0.0, 0.0, baseColour.w);
+                vec4 mrt_col1 = vec4(0.0, 0.0, 0.0, baseColour.w);
+
+                float sampleCount0 = 0.0;
+                float sampleCount1 = 0.0;
+
+                for (int i = 0; i < 16; i++) {
+                    float stepDistance = (float(i) + 0.5);
+
+                    // vertical blur.
+                    vec2 step0 = uInvViewDimensions * vec2(cos(uAngle - PI/2.0), sin(uAngle - PI/2.0)) * stepDistance;
+                    sampleCount0 += GatherAndApply(uSampler, vUv + step0, baseColour.w, mrt_col0, length(stepDistance * uInvViewDimensions * vec2(cos(uAngle - PI/2.0), sin(uAngle - PI/2.0))), mrt_col0);
+
+                    // diagonal blur
+                }
+
+                // Normalize if any colour was added
+                mrt_col0.xyz = sampleCount0 > 0.0 ? (mrt_col0.xyz/sampleCount0) : baseColour.xyz;
+                //mrt_col0.xyz = sampleCount1 > 0.0 ? (mrt_col1.xyz/sampleCount1) : baseColour.xyz;
+
+                // The second render target contains both of these added together. Don't divide by two here
+                // as it will be combined again and divided by three in the next pass.
+                mrt_col1.xyz += mrt_col0.xyz;
+
+                // For the combined term set the CoC to the blurriest of the two inputs.
+                if (float(abs(mrt_col0.w)) > float(abs(mrt_col1.w)))
+                {
+                    mrt_col1.w = mrt_col0.w;
+                }
+
+                gl_FragData[0] = mrt_col0;
+                gl_FragData[1] = mrt_col1;
 
                 // Compute the blur direction. Here, vertical.
-                vec2 blurDirection = uInvViewDimensions * vec2(cos(uAngle - PI/2.0), sin(uAngle - PI/2.0));
+                //vec2 blurDirection = uInvViewDimensions * vec2(cos(uAngle - PI/2.0), sin(uAngle - PI/2.0));
 
                 // Blur using the weights to bias it
-                vec4 color = BlurTexture(uSampler, vUv, blurDirection, CoC, centerDepth) * 1.0;
+                //vec4 color = BlurTexture(uSampler, vUv, blurDirection, CoC, centerDepth) * 1.0;
 
                 // Compute the blur direction. Here, diagonal.
-                vec2 blurDirection2 = CoC * uInvViewDimensions * vec2(cos(uAngle + PI / 6.0), sin(uAngle + PI / 6.0));
+                //vec2 blurDirection2 = CoC * uInvViewDimensions * vec2(cos(uAngle + PI / 6.0), sin(uAngle + PI / 6.0));
 
                 // Blur using the weights to bias it
-                vec4 color2 = BlurTexture(uSampler, vUv, blurDirection2, CoC, centerDepth) * 1.0;
+                //vec4 color2 = BlurTexture(uSampler, vUv, blurDirection2, CoC, centerDepth) * 1.0;
                 
                 // Output to MRT
-                gl_FragData[0] = vec4(color.xyz, CoC);
+                //gl_FragData[0] = vec4(color.xyz, CoC);
                 //gl_FragData[0] = vec4(CoC, 0.0, 0.0, 1.0);
                 //gl_FragData[0] = texture2D(uSampler, vUv);
                 //gl_FragData[0] = texture2D(uSamplerDepth, vUv);
@@ -522,109 +562,51 @@
                 //    gl_FragData[0] = vec4(1.0, 0.0, 0.0, 1.0);
                 //}
 
-                gl_FragData[1] = vec4(color2.rgb + color.xyz, CoC);
+                //gl_FragData[1] = vec4(color2.rgb + color.xyz, CoC);
             }
 
-            vec4 BlurTexture(sampler2D tex, vec2 uv, vec2 direction, float centerCoC, float centerDepth)
+            
+
+            float GatherAndApply(sampler2D tex, vec2 uv, float baseCoC, vec4 currCol, float stepDistance, inout vec4 outCol) 
             {
-                float linCenterDepth = LinearizeDepth(centerDepth);
 
-                vec4 finalColor = vec4(0.0, 0.0, 0.0, centerCoC);
-                float blurAmount = 0.0;
+                outCol = currCol;
+                vec4 col = texture2D(tex, uv);
 
-                // This offset is important. Prevents edge overlaps.
-                //uv += direction * 0.5;
-                
-                // i = 1, i = 4, i = 8, i = 12, i = 16
-                for (int i = 0; i < 8; ++i)
-                {
-                    vec2 sampleCoords = uv + direction * float(i);
-                    
-                    vec4 samplePixel  = texture2D(tex, sampleCoords);
-                    vec3 col = samplePixel.xyz;
-                    float samplePixelDepth = texture2D(uSamplerDepth, sampleCoords).x;
-                    float samplePixelCoC = clamp(samplePixel.a, 0.0, 1.0) * (PI/2.0);
+                float colDepth = LinearizeDepth(texture2D(uSamplerDepth, uv).x);
 
-                    float weight = samplePixelCoC;
+                bool blurNear = (colDepth < uFocalPlane);
+                float absCoC = abs(col.w);
 
-                    if (samplePixelDepth < centerDepth) {
-                        //samplePixel.xyz = vec3(1.0, 0.0, 0.0);
-                        
-                    } else if (samplePixelDepth > centerDepth) {
-                        //samplePixel.xyz = vec3(0.0, 1.0, 0.0);
-                    } else if (samplePixelDepth == centerDepth) {
-                        //samplePixel.xyz = vec3(0.0, 0.0, 1.0);
-                    }
 
-                    float stepDistance = length(direction * float(i));
-
-                    bool blurNear = (linCenterDepth < uFocalPlane);
-                    float linSamplePixelDepth = LinearizeDepth(samplePixelDepth);
-
-                   
-
-                    if (samplePixelCoC > stepDistance) {
-                        weight = samplePixelCoC;
-
+                if ((absCoC > stepDistance) &&
+                    (blurNear || (!blurNear && (baseCoC > 0.0 && (absCoC < baseCoC * 2.0)))) 
+                    )
+                    {
                         if (blurNear) {
-                            samplePixel.xyz = vec3(0.0, 1.0, 0.0);
-                            if (linSamplePixelDepth > linCenterDepth) {
-                                weight = 0.0;
+                            if (outCol.w < 0.0) {
+                                outCol.w = min(outCol.w, col.w);
+                            }
+                        } else {
+                            // This 
+                            if (-col.w > outCol.w)
+                            {
+                                outCol.w = col.w;
                             }
                         }
 
-                        if (centerCoC < 0.15) {
-                            //samplePixel.xyz = vec3(0.0, 1.0, 0.0);
-                             
-                            if (samplePixelDepth < centerDepth) {
-                                //samplePixel.xyz = vec3(0.0, 0.0, 1.0);
-                                weight = 1.0;
-                            }
+                        //float sampleFraction = clamp(absCoC - stepDistance)/
+                        outCol.xyz += absCoC * col.xyz;
 
-                            //weight = 0.0;
-                            if (samplePixelDepth > centerDepth) {
-                                weight = 0.0;
-                            }
-                        }
-
-                        if ((samplePixelDepth < centerDepth)) {
-                            //samplePixel.xyz = vec3 (1.0, 0.0, 0.0);
-
-                            if (samplePixelCoC < 0.20) {
-                                //weight = 0.0;
-                            }
-                        }
-
-                        if (samplePixelCoC < 0.15) {
-                            //samplePixel.xyz = vec3(0.0, 1.0, 0.0);
-                        }
-
-                        
-                    } else {
-                        weight = 0.0;
-                        if (i == 0 ) {
-                            //weight = 1.0;
-                        }
+                        return absCoC;
                     }
 
-                    //if (centerCoC < 0.15)  {
-                    //    weight = 0.0;
-                    //}
+                    // No colours added
+                    return 0.0;
 
-                    if (i == 0) {
-                        weight = 1.0;
-                    }
-
-
-                    //weight = 1.0/float(NUM_SAMPLES);
-                    samplePixel.xyz  *= weight;
-                    blurAmount       += weight;
-                    finalColor       += samplePixel;
-                }
-
-                finalColor.xyz = (finalColor.xyz / blurAmount);
-                return finalColor;
             }
+
+
         </script>
 
         <script id="rhombiBlurPass-fs" type="x-shader/x-fragment">
