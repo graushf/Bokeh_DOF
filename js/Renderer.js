@@ -64,11 +64,12 @@ function drawEffectPass() {
     //drawScreenFillingGeometry(shaderProgramScrFillTexturePass);
     //renderScrFillTexture(textureBackBuffer);
     //drawLinearDepth();
-    renderScrFillTexture(MRTfbData.t[0]);
+    //renderScrFillTexture(MRTfbData.t[1]);
+    //renderScrFillTexture(textureBackBuffer);
     //renderScrFillTexture(textureDepthHalfColorBuffer);
     //renderDownsamplePass(1);
     //renderScrFillTexture(textureBackBufferHalf);
-    //renderScrFillTexture(textureRhombiBlurBuffer);
+    renderScrFillTexture(textureRhombiBlurBuffer);
     //renderScrFillTexture(textureSceneBuffer);
     //renderDownsamplePass(0);
 
@@ -98,7 +99,7 @@ function drawScene(programToDraw)
     
     drawSceneObjects(programToDraw);
     drawHexProducingSpheres(programToDraw);
-    //drawHexProducingSpheres2(programToDraw);
+    drawHexProducingSpheres2(programToDraw);
 }
 
 function drawSceneObjects(programToDraw) {
