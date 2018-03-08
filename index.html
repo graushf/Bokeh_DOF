@@ -629,6 +629,23 @@
 
         </script>
 
+        <script id="DOFCompositionPass-fs" type="x-shader/x-fragment">
+            precision mediump float;
+
+            uniform sampler2D uSampler;
+
+            varying  vec2 vUv;
+
+            void main(void) {
+                vec4 col = texture2D(uSampler, vUv);
+                
+                col.rgb /= 2.0; // Dividing by the premultiplied coc to return original color
+
+                gl_FragColor = vec4(col.rgb, 1.0);
+            }
+        
+        </script>
+
         <script id="linearDepth-fs" type="x-shader/x-fragment">
             precision mediump float;
 

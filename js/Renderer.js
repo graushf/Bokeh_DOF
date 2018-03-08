@@ -69,7 +69,7 @@ function drawEffectPass() {
     //renderScrFillTexture(textureDepthHalfColorBuffer);
     //renderDownsamplePass(1);
     //renderScrFillTexture(textureBackBufferHalf);
-    renderScrFillTexture(textureRhombiBlurBuffer);
+    //renderScrFillTexture(textureRhombiBlurBuffer);
     //renderScrFillTexture(textureSceneBuffer);
     //renderDownsamplePass(0);
 
@@ -85,6 +85,8 @@ function drawEffectPass() {
     //renderScenePass(1);
     renderDownsamplePass(0);
 
+    gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+    renderDOFCompositionPass(textureRhombiBlurBuffer);
 }
 
 function drawScene(programToDraw)
@@ -1413,6 +1415,31 @@ function renderDownsampleDepthPass() {
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, textureDepthColorBuffer);
     gl.uniform1i(shaderProgramDownsampledDepthPass.samplerUniform, 0);
+
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, screenFillingIndexBuffer);
+    gl.drawElements(gl.TRIANGLES, screenFillingIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+}
+
+function renderDOFCompositionPass(texture) {
+    gl.useProgram(shaderProgramDOFCompositionPass);
+
+    shaderProgramDOFCompositionPass.vertexPositionAttribute = gl.getAttribLocation(shaderProgramDOFCompositionPass, "aVertexPosition");
+    gl.enableVertexAttribArray(shaderProgramDOFCompositionPass.vertexPositionAttribute);
+
+    shaderProgramDOFCompositionPass.textureCoordAttribute = gl.getAttribLocation(shaderProgramDOFCompositionPass, "aTextureCoord");
+    gl.enableVertexAttribArray(shaderProgramDOFCompositionPass.textureCoordAttribute);
+
+    shaderProgramDOFCompositionPass.samplerUniform = gl.getUniformLocation(shaderProgramDOFCompositionPass, "uSampler");
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, screenFillingVertexPositionBuffer);
+    gl.vertexAttribPointer(shaderProgramDOFCompositionPass.vertexPositionAttribute, screenFillingVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, screenFillingTextureCoordBuffer);
+    gl.vertexAttribPointer(shaderProgramDOFCompositionPass.textureCoordAttribute, screenFillingTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.uniform1i(shaderProgramDOFCompositionPass.samplerUniform, 0);
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, screenFillingIndexBuffer);
     gl.drawElements(gl.TRIANGLES, screenFillingIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);

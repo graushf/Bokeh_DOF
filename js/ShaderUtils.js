@@ -9,6 +9,7 @@ var shaderProgramDepthPass;
 var shaderProgramDepthPassBackground;
 var shaderProgramLinearDepthPass;
 var shaderProgramDownsampledDepthPass;
+var shaderProgramDOFCompositionPass;
 
 function getShader(gl, id) 
 {
@@ -60,6 +61,8 @@ function setupShadersScene()
 	initShadersDepthPassBackground();
 	initShadersLinearDepth();
 	initShadersDownsampledDepthPass();
+
+	initShadersDOFCompositionPass();
 }
 
 function initShaderBasic() 
@@ -231,4 +234,19 @@ function initShadersDownsampledDepthPass() {
 	if (!gl.getProgramParameter(shaderProgramDownsampledDepthPass, gl.LINK_STATUS)) {
 		alert("Could not initialise the shaders");
 	}
+}
+
+function initShadersDOFCompositionPass() {
+	var fragmentShader = getShader(gl, "DOFCompositionPass-fs");
+	var vertexShader = getShader(gl, "screenFillingTexture-vs");
+
+	shaderProgramDOFCompositionPass = gl.createProgram();
+	gl.attachShader(shaderProgramDOFCompositionPass, vertexShader);
+	gl.attachShader(shaderProgramDOFCompositionPass, fragmentShader);
+	gl.linkProgram(shaderProgramDOFCompositionPass);
+
+	if (!gl.getProgramParameter(shaderProgramDOFCompositionPass, gl.LINK_STATUS)) {
+		alert("Could not initialise the shaders");
+	}
+
 }
