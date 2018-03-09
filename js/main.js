@@ -48,6 +48,8 @@ var focallength = 0.020;
 var CoCScale;
 var CoCBias;
 
+var cocScaler = 1.0;
+
 // Debug CoC
 var DepthDebug = 1.0;
 

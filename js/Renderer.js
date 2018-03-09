@@ -49,16 +49,25 @@ function drawEffectPass() {
     ];
     ext3.drawBuffersWEBGL(bufferList);
 
-    drawVerticalAndDiagonalBlurPass();
+    drawVerticalAndDiagonalBlurPass(0.0);
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, rhombiBlurBuffer);
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 
     drawRhombiBlurPassOptimized();
 
+
+
+
+
+
+    
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 
+    //renderDOFCompositionPass(textureRhombiBlurBuffer);
+    renderScrFillTexture(textureRhombiBlurBuffer);
+    //renderScrFillTexture(MRTfbData.t[0]);
     
     //drawScreenTexture();
     //drawScreenFillingGeometry(shaderProgramScrFillTexturePass);
@@ -78,15 +87,33 @@ function drawEffectPass() {
     drawLinearDepth();
 
     gl.viewport(3*gl.viewportWidth/4, 2*gl.viewportHeight/4, gl.viewportWidth/4, gl.viewportHeight/4);
-    //renderScenePass(1);
-    renderDownsamplePass(1);
+    renderScenePass(1);
+    //renderDownsamplePass(1);
 
     gl.viewport(3*gl.viewportWidth/4, 1*gl.viewportHeight/4, gl.viewportWidth/4, gl.viewportHeight/4);
     //renderScenePass(1);
-    renderDownsamplePass(0);
+    //renderDownsamplePass(0);
+    //renderScrFillTexture(MRTfbData.t[0]);
 
+    //renderDOFCompositionPass(textureRhombiBlurBuffer);
+    //renderDOFCompositionPass(textureRhombiBlurBuffer);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, MRTfbData.f);
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
-    renderDOFCompositionPass(textureRhombiBlurBuffer);
+
+    var bufferList = [
+        ext3.COLOR_ATTACHMENT0_WEBGL,
+        ext3.COLOR_ATTACHMENT1_WEBGL
+    ];
+    ext3.drawBuffersWEBGL(bufferList);
+    drawVerticalAndDiagonalBlurPass(1.0);
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.viewport(3*gl.viewportWidth/4, 1*gl.viewportHeight/4, gl.viewportWidth/4, gl.viewportHeight/4);
+
+    renderScrFillTexture(MRTfbData.t[0]);
+
+    gl.viewport(3*gl.viewportWidth/4, 0*gl.viewportHeight/4, gl.viewportWidth/4, gl.viewportHeight/4);
+    renderScrFillTexture(MRTfbData.t[1]);
 }
 
 function drawScene(programToDraw)
@@ -1170,6 +1197,8 @@ function renderScenePass(enableDebugCoC) {
 
     shaderProgramScenePass.uDepthDebugUniform = gl.getUniformLocation(shaderProgramScenePass, "uDebugDepth");
 
+    shaderProgramScenePass.COCScalerUniform = gl.getUniformLocation(shaderProgramScenePass, "uCoCScaler");
+
 
     gl.bindBuffer(gl.ARRAY_BUFFER, screenFillingVertexPositionBuffer);
     gl.vertexAttribPointer(shaderProgramScenePass.vertexPositionAttribute, screenFillingVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
@@ -1204,6 +1233,9 @@ function renderScenePass(enableDebugCoC) {
     gl.uniform1i(shaderProgramScenePass.uDebugCoCUniform, enableDebugCoC);
 
     gl.uniform1f(shaderProgramScenePass.uDepthDebugUniform, DepthDebug);
+
+
+    gl.uniform1f(shaderProgramScenePass.COCScalerUniform, cocScaler);
 
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, textureSceneBuffer);
@@ -1259,7 +1291,7 @@ function renderDownsamplePass(enableDebugCoC) {
     gl.drawElements(gl.TRIANGLES, screenFillingIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 }
 
-function drawVerticalAndDiagonalBlurPass() {
+function drawVerticalAndDiagonalBlurPass(debugCoC) {
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
@@ -1280,6 +1312,10 @@ function drawVerticalAndDiagonalBlurPass() {
 
     shaderProgramVerAndDiagBlurPass.focalPlaneUniform = gl.getUniformLocation(shaderProgramVerAndDiagBlurPass, "uFocalPlane");
 
+    shaderProgramVerAndDiagBlurPass.debugCoCAfterPass = gl.getUniformLocation(shaderProgramVerAndDiagBlurPass, "uDebugCoC");
+
+    shaderProgramVerAndDiagBlurPass.cocScalerUniform = gl.getUniformLocation(shaderProgramVerAndDiagBlurPass, "uCoCScaler");
+
     gl.bindBuffer(gl.ARRAY_BUFFER, screenFillingVertexPositionBuffer);
     gl.vertexAttribPointer(shaderProgramVerAndDiagBlurPass.vertexPositionAttribute, screenFillingVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
@@ -1295,6 +1331,10 @@ function drawVerticalAndDiagonalBlurPass() {
     gl.uniform1f(shaderProgramVerAndDiagBlurPass.angleUniform, Angle);
 
     gl.uniform1f(shaderProgramVerAndDiagBlurPass.focalPlaneUniform, focalplane);
+
+    gl.uniform1f(shaderProgramVerAndDiagBlurPass.debugCoCAfterPass, debugCoC);
+
+    gl.uniform1f(shaderProgramVerAndDiagBlurPass.cocScalerUniform, cocScaler);
 
     gl.activeTexture(gl.TEXTURE0);
     //gl.bindTexture(gl.TEXTURE_2D, textureBackBufferHalf);

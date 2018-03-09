@@ -370,6 +370,8 @@
         <script id="scenePass-fs" type="x-shader/x-fragment">
             precision mediump float;
 
+            #define PI 3.1415926535897932384626433832795
+
             uniform sampler2D uSamplerColor;
             uniform sampler2D uSamplerDepth;
 
@@ -387,6 +389,8 @@
             uniform float uZFar;
 
             uniform float uDebugDepth;
+
+            uniform float uCoCScaler;
 
             varying vec2 vUv;
 
@@ -408,8 +412,11 @@
                 if (uDebugCoC == 1) {
                     gl_FragColor = vec4(_CoC, 0.0, 0.0, 1.0); return;
                 }
-
+                
+                _CoC = clamp(_CoC, 0.0, 1.0) * uCoCScaler;
+                scene.rgb *= _CoC;
                 gl_FragColor = vec4(scene, _CoC); // Returns scene colour and CoC as .a channel
+                //gl_FragColor = vec4(_CoC, 0.0, 0.0, 1.0);
             }
         </script>
 
@@ -477,10 +484,14 @@
             uniform vec2 uInvViewDimensions;
             uniform float uAngle;
 
+            uniform float uDebugCoC;
+
+            uniform float uCoCScaler;
+
             varying vec2 vUv;
 
             // function prototypes
-            vec4 BlurTexture(sampler2D tex, vec2 uv, vec2 direction, float centerCoC, float centerDepth);
+            vec4 BlurTexture(sampler2D tex, vec2 uv, vec2 direction, float centerCoC);
 
             float LinearizeDepth(float depth) 
             {
@@ -491,68 +502,66 @@
             }
 
             void main(void) {
+                
                 // Get the centre to determine the radius of the blur
                 vec4 centerColor = texture2D(uSampler, vUv);
-                float CoC = centerColor.a;
-
-                float centerDepth = texture2D(uSamplerDepth, vUv).x;
-
-                float linZ = LinearizeDepth(centerDepth);
+                float coc = centerColor.a;
 
                 // Compute the blur direction. Here, vertical.
-                vec2 blurDirection = CoC * uInvViewDimensions * vec2(cos(uAngle - PI/2.0), sin(uAngle - PI/2.0));
+                vec2 blurDirection = coc * uInvViewDimensions * vec2(cos(uAngle - PI/2.0), sin(uAngle - PI/2.0));
 
                 // Blur using the weights to bias it
-                vec4 color = BlurTexture(uSampler, vUv, blurDirection, CoC, centerDepth) * 1.0;
+                vec4 color = BlurTexture(uSampler, vUv, blurDirection, coc) * coc;
 
                 // Compute the blur direction. Here, diagonal.
-                vec2 blurDirection2 = CoC * uInvViewDimensions * vec2(cos(uAngle + PI / 6.0), sin(uAngle + PI / 6.0));
+                vec2 blurDirection2 = coc * uInvViewDimensions * vec2(cos(uAngle + PI / 6.0), sin(uAngle + PI / 6.0));
 
                 // Blur using the weights to bias it
-                vec4 color2 = BlurTexture(uSampler, vUv, blurDirection2, CoC, centerDepth) * 1.0;
+                vec4 color2 = BlurTexture(uSampler, vUv, blurDirection2, coc) * coc;
                 
                 // Output to MRT
-                gl_FragData[0] = vec4(color.xyz, CoC);
-                //gl_FragData[0] = vec4(CoC, 0.0, 0.0, 1.0);
-                //gl_FragData[0] = texture2D(uSampler, vUv);
-                //gl_FragData[0] = texture2D(uSamplerDepth, vUv);
-                //gl_FragData[0] = vec4(vec3(linZ/100.0), 1.0);
-                //if (linZ < uFocalPlane) {
-                //    gl_FragData[0] = vec4(1.0, 0.0, 0.0, 1.0);
-                //}
+                gl_FragData[0] = vec4(color.xyz, coc);
+                //gl_FragData[0] = centerColor; 
+                gl_FragData[1] = vec4(color2.rgb + color.xyz, coc);
 
-                gl_FragData[1] = vec4(color2.rgb + color.xyz, CoC);
+                if (uDebugCoC == 1.0) {
+                    gl_FragData[0] = vec4(0.0, uCoCScaler, 0.0, 1.0);
+                    gl_FragData[1] = vec4(color2.w, 0.0, 0.0, 1.0);
+                }
             }
 
-            vec4 BlurTexture(sampler2D tex, vec2 uv, vec2 direction, float centerCoC, float centerDepth)
+            vec4 BlurTexture(sampler2D tex, vec2 uv, vec2 direction, float centerCoC)
             {
-                float linCenterDepth = LinearizeDepth(centerDepth);
-
-                vec4 finalColor = vec4(0.0, 0.0, 0.0, centerCoC);
+                //vec4 finalColor = vec4(0.0, 0.0, 0.0, centerCoC); // WORKS OKAY
+                vec4 finalColor = vec4(0.0, 0.0, 0.0, 0.0);
                 float blurAmount = 0.0;
 
                 // This offset is important. Prevents edge overlaps.
                 uv += direction * 0.5;
                 
                 // i = 1, i = 4, i = 8, i = 12, i = 16
-                for (int i = 0; i < NUM_SAMPLES; ++i)
+                for (int i = 0; i < 16; ++i)
                 {
-                    vec2 sampleCoords = uv + direction * float(i);
+                    vec4 color = texture2D(tex, uv + direction * float(i));
+
+                    if (length(uInvViewDimensions * color.a * float(NUM_SAMPLES)) > length(direction * float(i))) {
+                        //color.xyz *= color.a;
+                        blurAmount += color.a;
+                        //finalColor.xyz += color.xyz; // WORKS OKAY
+                        finalColor += color;
+                    }
+
+                    //if (length(uInvViewDimensions * color.a * float(NUM_SAMPLES)) > length(uInvViewDimensions * centerCoC)) {
+                        //color.xyz *= color.a;
+                    //    blurAmount += color.a;
+                        //finalColor.xyz += color.xyz; // WORKS OKAY
+                    //    finalColor += color;
+                    //}
                     
-                    vec4 samplePixel  = texture2D(tex, sampleCoords);
-                    vec3 col = samplePixel.xyz;
-                    float samplePixelDepth = texture2D(uSamplerDepth, sampleCoords).x;
-
-                    float weight = samplePixel.a;
-
-                    //weight = 1.0/float(NUM_SAMPLES);
-                    samplePixel.xyz  *= weight;
-                    blurAmount       += weight;
-                    finalColor.xyz       += samplePixel.xyz;
+                    
                 }
-
-                finalColor.xyz = (finalColor.xyz / blurAmount);
-                return finalColor;
+                //return vec4((finalColor.xyz / blurAmount), finalColor.w); // WORKS OKAY
+                return (finalColor/blurAmount);
             }
         </script>
 
@@ -572,7 +581,7 @@
             varying vec2 vUv;
 
             // prototype functions
-            vec4 BlurTexture(sampler2D tex, vec2 uv, vec2 direction, float centerCoC, float centerDepth);
+            vec4 BlurTexture(sampler2D tex, vec2 uv, vec2 direction, float centerCoC);
             
             void main(void) {
                 // Get the centre to determine the radius of the blur
@@ -586,8 +595,8 @@
                 vec2 blurDirection2 = coc2 * uInvViewDimensions * vec2(cos(uAngle + 5.0 * PI/6.0), sin(uAngle + 5.0 * PI/6.0));
 
                 // Blur using the weights to bias it
-                vec4 color = BlurTexture(uVerticalBlurTexture, vUv, blurDirection, coc, 0.0) * 1.0;
-                vec4 color2 = BlurTexture(uDiagonalBlurTexture, vUv, blurDirection2, coc2, 0.0) * 1.0;
+                vec4 color = BlurTexture(uVerticalBlurTexture, vUv, blurDirection, coc) * coc;
+                vec4 color2 = BlurTexture(uDiagonalBlurTexture, vUv, blurDirection2, coc2) * coc2;
 
                 vec3 outputCol = (color.rgb + color2.rgb) * 0.5;
 
@@ -597,53 +606,52 @@
 
                 // Expose. Hacked-up for this demo
                 //gl_FragColor = vec4(1.0 - exp(-outputCol.rgb/8.0), 1.0);
-                gl_FragColor = vec4(1.0 - exp(-outputCol.rgb/0.6), 1.0);
+                //gl_FragColor = vec4(1.0 - exp(-outputCol.rgb/0.6), coc);
+
+                vec4 col = vec4(outputCol.rgb, coc);
+                col.rgb /= col.a > 0.0 ? col.a : 1.0; // catching division by 0
+                gl_FragColor = vec4(1.0 - exp(-col.rgb/0.6), 1.0);
+                
+
+                //gl_FragColor = vec4(col.rgb, 1.0);
 
                 //gl_FragColor = vec4(outputCol, 1.0);
             }
 
-            vec4 BlurTexture(sampler2D tex, vec2 uv, vec2 direction, float centerCoC, float centerDepth)
+            vec4 BlurTexture(sampler2D tex, vec2 uv, vec2 direction, float centerCoC)
             {
-                vec4 finalColor = vec4(0.0, 0.0, 0.0, centerCoC);
+                //vec4 finalColor = vec4(0.0, 0.0, 0.0, centerCoC); // WORKS OKAY
+                vec4 finalColor = vec4(0.0, 0.0, 0.0, 0.0);
                 float blurAmount = 0.0;
 
-                // This offset is important
+                // This offset is important. Prevents edge overlaps.
                 uv += direction * 0.5;
-
-                for (int i = 0; i < NUM_SAMPLES; ++i)
-                {
-                    vec2 sampleCoords = uv + direction * float(i);
-
-                    vec4 samplePixel = texture2D(tex, sampleCoords);
-
-                    float weight = samplePixel.a;
-
-                    samplePixel.xyz  *= weight;
-                    blurAmount       += weight;
-                    finalColor.xyz   += samplePixel.xyz;
-                }
-
-                finalColor.xyz = (finalColor.xyz / blurAmount);
-                return finalColor;
-            }
-
-        </script>
-
-        <script id="DOFCompositionPass-fs" type="x-shader/x-fragment">
-            precision mediump float;
-
-            uniform sampler2D uSampler;
-
-            varying  vec2 vUv;
-
-            void main(void) {
-                vec4 col = texture2D(uSampler, vUv);
                 
-                col.rgb /= 2.0; // Dividing by the premultiplied coc to return original color
+                // i = 1, i = 4, i = 8, i = 12, i = 16
+                for (int i = 0; i < 16; ++i)
+                {
+                    vec4 color = texture2D(tex, uv + direction * float(i));
 
-                gl_FragColor = vec4(col.rgb, 1.0);
+                    if (length(uInvViewDimensions * color.a * float(NUM_SAMPLES)) > length(direction * float(i))) {
+                        //color.xyz *= color.a;
+                        blurAmount += color.a;
+                        //finalColor.xyz += color.xyz; // WORKS OKAY
+                        finalColor += color;
+                    }
+
+                    //if (length(uInvViewDimensions * color.a * float(NUM_SAMPLES)) > length(uInvViewDimensions * centerCoC)) {
+                        //color.xyz *= color.a;
+                    //    blurAmount += color.a;
+                        //finalColor.xyz += color.xyz; // WORKS OKAY
+                    //    finalColor += color;
+                    //}
+                    
+                    
+                }
+                //return vec4((finalColor.xyz / blurAmount), finalColor.w); // WORKS OKAY
+                return (finalColor/blurAmount);
             }
-        
+
         </script>
 
         <script id="linearDepth-fs" type="x-shader/x-fragment">
@@ -670,9 +678,123 @@
                 float linZ = LinearizeDepth(depthValue);
 
                 gl_FragColor = vec4(vec3(linZ/uFar), 1.0);
-                
+                //gl_FragColor = vec4(vec3(depthValue), 1.0);
                 if (linZ < uFocalPlane) {
                     gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0);
+                }
+            }
+
+        </script>
+
+        <script id="DOFComposition-fs" type="x-shader/x-fragment">
+            precision mediump float;
+
+            uniform sampler2D uSamplerNearRegion;
+            uniform sampler2D uSamplerFocusRegion;
+            uniform sampler2D uSamplerFarRegion;
+            uniform sampler2D uSamplerDepth;
+
+            uniform float uNearFocusDistance;
+            uniform float uFarFocusDistance;
+
+            uniform float uNear;
+            uniform float uFar;
+
+            varying vec2 vUv;
+
+            float LinearizeDepth(float depth) 
+            {
+                float z = depth * 2.0 - 1.0; // back to NDC 
+                return (2.0 * uNear * uFar) / (uFar + uNear - z * (uFar - uNear));	
+            }
+
+            void main(void) {
+                //gl_FragColor = vec4(1.0, 0.0, 0.0, 0.2); return;
+                gl_FragColor = texture2D(uSamplerNearRegion, vUv); return;
+
+                float depth = texture2D(uSamplerDepth, vUv).x;
+
+                float linZ = LinearizeDepth(depth);
+
+                //gl_FragColor = texture2D(uSamplerDepth, vUv);
+                gl_FragColor = vec4(vec3(linZ/uFar), 1.0);
+                //gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+
+                gl_FragColor = texture2D(uSamplerFocusRegion, vUv);
+
+                if (linZ < uNearFocusDistance) {
+                    gl_FragColor = texture2D(uSamplerNearRegion, vUv);
+                    //gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0);
+                } 
+                if (linZ > uFarFocusDistance) {
+                    gl_FragColor = texture2D(uSamplerFarRegion, vUv);
+                    //gl_FragColor = vec4(0.0, 0.0, 1.0, 1.0);
+                }
+            }
+        </script>
+
+
+        <script id="DOFCompositionPass-fs" type="x-shader/x-fragment">
+            precision mediump float;
+
+            uniform sampler2D uSampler;
+
+            varying vec2 vUv;
+
+            void main(void) {
+                vec4 col = texture2D(uSampler, vUv);
+                //col.a = 1.0;
+                //clamp(col.a, 0.0, 1.0);
+                col.rgb /= col.a > 0.0 ? col.a : 1.0; // catching division by 0
+
+
+                //col.rgb /= col.a;
+
+                //col.rgb = vec3(col.a, 0.0, 0.0);
+                gl_FragColor = vec4(col.rgb, 1.0);
+            }
+
+
+        </script>
+
+
+
+
+
+        <script id="debufFocusPlanes-fs" type="x-shader/x-fragment">
+            precision mediump float;
+
+            uniform sampler2D uSampler;
+            uniform float uNear;
+            uniform float uFar;
+
+            uniform float uFocalPlane;
+
+            uniform float uNearFocusDistance;
+            uniform float uFarFocusDistance;
+
+            varying vec2 vUv;
+
+            float LinearizeDepth(float depth) 
+            {
+                float z = depth * 2.0 - 1.0; // back to NDC 
+                return (2.0 * uNear * uFar) / (uFar + uNear - z * (uFar - uNear));	
+            }
+
+            void main(void) {   
+                //gl_FragColor = vec4(texture2D(uSampler, vUv).xyz, 1.0); return;
+                float depthValue = texture2D(uSampler, vUv).x;
+                
+                float linZ = LinearizeDepth(depthValue);
+
+                gl_FragColor = vec4(vec3(linZ/uFar), 1.0);
+                
+                if (linZ < uNearFocusDistance) {
+                    gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0);
+                }
+
+                if (linZ > uFarFocusDistance) {
+                    gl_FragColor = vec4(0.0, 0.0, 1.0, 1.0);
                 }
             }
 
@@ -717,7 +839,8 @@
                 <div>Focal Length (O/L): <span id="FocallengthId"></span></div>
                 <div>CoCScale: <span id="CoCScaleId"></span></div>
                 <div>CoCBias: <span id="CoCBiasId"></span></div>
-                <div id="debug-label">Depth [DEBUG] (1/2): <span id="DepthDebugId"></span></div>
+                <div class="debug-label">Near Focus Distance [DEBUG] (1/2): <span id="NearFocusDistanceId"></span></div>
+                <div class="debug-label">Far Focus Distance [DEBUG] (3/4): <span id="FarFocusDistanceId"></span></div>
             </div>
         </div>
     </body>
