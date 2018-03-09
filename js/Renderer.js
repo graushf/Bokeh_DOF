@@ -65,8 +65,8 @@ function drawEffectPass() {
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 
-    //renderDOFCompositionPass(textureRhombiBlurBuffer);
-    renderScrFillTexture(textureRhombiBlurBuffer);
+    renderDOFCompositionPass(textureRhombiBlurBuffer);
+    //renderScrFillTexture(MRTfbData.t[1]);
     //renderScrFillTexture(MRTfbData.t[0]);
     
     //drawScreenTexture();

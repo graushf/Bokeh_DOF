@@ -522,7 +522,7 @@
                 // Output to MRT
                 gl_FragData[0] = vec4(color.xyz, coc);
                 //gl_FragData[0] = centerColor; 
-                gl_FragData[1] = vec4(color2.rgb + color.xyz, coc);
+                gl_FragData[1] = vec4((color2.rgb + color.xyz), coc);
 
                 if (uDebugCoC == 1.0) {
                     gl_FragData[0] = vec4(0.0, uCoCScaler, 0.0, 1.0);
@@ -598,6 +598,8 @@
                 vec4 color = BlurTexture(uVerticalBlurTexture, vUv, blurDirection, coc) * coc;
                 vec4 color2 = BlurTexture(uDiagonalBlurTexture, vUv, blurDirection2, coc2) * coc2;
 
+
+                //gl_FragColor = vec4(color.rgb, coc); return;
                 vec3 outputCol = (color.rgb + color2.rgb) * 0.5;
 
                 //gl_FragColor = vec4((color.rgb + color2.xyz) / 2.0, 1.0); return;
