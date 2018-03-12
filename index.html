@@ -557,8 +557,6 @@
                         //finalColor.xyz += color.xyz; // WORKS OKAY
                     //    finalColor += color;
                     //}
-                    
-                    
                 }
                 //return vec4((finalColor.xyz / blurAmount), finalColor.w); // WORKS OKAY
                 return (finalColor/blurAmount);
@@ -610,9 +608,15 @@
                 //gl_FragColor = vec4(1.0 - exp(-outputCol.rgb/8.0), 1.0);
                 //gl_FragColor = vec4(1.0 - exp(-outputCol.rgb/0.6), coc);
 
+                //vec4 col = vec4(outputCol.rgb, coc);
+                //col.rgb /= col.a > 0.0 ? col.a : 1.0; // catching division by 0
+                //gl_FragColor = vec4(1.0 - exp(-col.rgb/0.6), 1.0);
+                
+                outputCol = (color.rgb + color2.rgb) * 0.33;
                 vec4 col = vec4(outputCol.rgb, coc);
                 col.rgb /= col.a > 0.0 ? col.a : 1.0; // catching division by 0
-                gl_FragColor = vec4(1.0 - exp(-col.rgb/0.6), 1.0);
+                gl_FragColor = vec4(col.rgb, 1.0);
+            
                 
 
                 //gl_FragColor = vec4(col.rgb, 1.0);

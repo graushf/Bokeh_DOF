@@ -66,6 +66,7 @@ function drawEffectPass() {
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 
     renderDOFCompositionPass(textureRhombiBlurBuffer);
+    //renderDOFCompositionPass(textureSceneBuffer);
     //renderScrFillTexture(MRTfbData.t[1]);
     //renderScrFillTexture(MRTfbData.t[0]);
     
@@ -110,10 +111,10 @@ function drawEffectPass() {
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     gl.viewport(3*gl.viewportWidth/4, 1*gl.viewportHeight/4, gl.viewportWidth/4, gl.viewportHeight/4);
 
-    renderScrFillTexture(MRTfbData.t[0]);
+    //renderScrFillTexture(MRTfbData.t[0]);
 
     gl.viewport(3*gl.viewportWidth/4, 0*gl.viewportHeight/4, gl.viewportWidth/4, gl.viewportHeight/4);
-    renderScrFillTexture(MRTfbData.t[1]);
+    //renderScrFillTexture(textureSceneBuffer);
 }
 
 function drawScene(programToDraw)
