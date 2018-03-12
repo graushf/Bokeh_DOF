@@ -520,12 +520,13 @@
                 vec4 color2 = BlurTexture(uSampler, vUv, blurDirection2, coc) * coc;
                 
                 // Output to MRT
+                //gl_FragData[0] = vec4(color.xyz, coc - color.w);
                 gl_FragData[0] = vec4(color.xyz, coc);
                 //gl_FragData[0] = centerColor; 
                 gl_FragData[1] = vec4((color2.rgb + color.xyz), coc);
 
                 if (uDebugCoC == 1.0) {
-                    gl_FragData[0] = vec4(0.0, uCoCScaler, 0.0, 1.0);
+                    gl_FragData[0] = vec4(color.w, 0.0, 0.0, 1.0);
                     gl_FragData[1] = vec4(color2.w, 0.0, 0.0, 1.0);
                 }
             }
@@ -533,7 +534,7 @@
             vec4 BlurTexture(sampler2D tex, vec2 uv, vec2 direction, float centerCoC)
             {
                 //vec4 finalColor = vec4(0.0, 0.0, 0.0, centerCoC); // WORKS OKAY
-                vec4 finalColor = vec4(0.0, 0.0, 0.0, 0.0);
+                vec4 finalColor = vec4(0.0, 0.0, 0.0, centerCoC);
                 float blurAmount = 0.0;
 
                 // This offset is important. Prevents edge overlaps.
@@ -548,7 +549,8 @@
                         //color.xyz *= color.a;
                         blurAmount += color.a;
                         //finalColor.xyz += color.xyz; // WORKS OKAY
-                        finalColor += color;
+                        finalColor.xyz += color.xyz;
+                        //finalColor.a -= color.a;
                     }
 
                     //if (length(uInvViewDimensions * color.a * float(NUM_SAMPLES)) > length(uInvViewDimensions * centerCoC)) {
@@ -560,6 +562,7 @@
                 }
                 //return vec4((finalColor.xyz / blurAmount), finalColor.w); // WORKS OKAY
                 return (finalColor/blurAmount);
+                //return vec4((finalColor.xyz/blurAmount), finalColor.a);
             }
         </script>
 
@@ -596,7 +599,7 @@
                 vec4 color = BlurTexture(uVerticalBlurTexture, vUv, blurDirection, coc) * coc;
                 vec4 color2 = BlurTexture(uDiagonalBlurTexture, vUv, blurDirection2, coc2) * coc2;
 
-
+                //gl_FragColor = vec4(color.xyz, 1.0); return;
                 //gl_FragColor = vec4(color.rgb, coc); return;
                 vec3 outputCol = (color.rgb + color2.rgb) * 0.5;
 
@@ -643,6 +646,7 @@
                         blurAmount += color.a;
                         //finalColor.xyz += color.xyz; // WORKS OKAY
                         finalColor += color;
+                        //finalColor.a -= color.a;
                     }
 
                     //if (length(uInvViewDimensions * color.a * float(NUM_SAMPLES)) > length(uInvViewDimensions * centerCoC)) {
@@ -651,11 +655,10 @@
                         //finalColor.xyz += color.xyz; // WORKS OKAY
                     //    finalColor += color;
                     //}
-                    
-                    
                 }
                 //return vec4((finalColor.xyz / blurAmount), finalColor.w); // WORKS OKAY
                 return (finalColor/blurAmount);
+                //return vec4((finalColor.xyz/blurAmount), finalColor.a);
             }
 
         </script>

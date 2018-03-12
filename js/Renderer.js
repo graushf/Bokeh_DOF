@@ -56,19 +56,16 @@ function drawEffectPass() {
 
     drawRhombiBlurPassOptimized();
 
-
-
-
-
-
     
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 
-    renderDOFCompositionPass(textureRhombiBlurBuffer);
+    //renderScrFillTexture(textureRhombiBlurBuffer);
+    //renderDOFCompositionPass(textureRhombiBlurBuffer);
     //renderDOFCompositionPass(textureSceneBuffer);
     //renderScrFillTexture(MRTfbData.t[1]);
     //renderScrFillTexture(MRTfbData.t[0]);
+    renderScrFillTexture(textureRhombiBlurBuffer);
     
     //drawScreenTexture();
     //drawScreenFillingGeometry(shaderProgramScrFillTexturePass);
@@ -85,10 +82,10 @@ function drawEffectPass() {
 
     gl.viewport(3*gl.viewportWidth/4, 3*gl.viewportHeight/4, gl.viewportWidth/4, gl.viewportHeight/4);
     //renderScrFillTexture(textureSceneBuffer);
-    drawLinearDepth();
+    //drawLinearDepth();
 
     gl.viewport(3*gl.viewportWidth/4, 2*gl.viewportHeight/4, gl.viewportWidth/4, gl.viewportHeight/4);
-    renderScenePass(1);
+    //renderScenePass(1);
     //renderDownsamplePass(1);
 
     gl.viewport(3*gl.viewportWidth/4, 1*gl.viewportHeight/4, gl.viewportWidth/4, gl.viewportHeight/4);
