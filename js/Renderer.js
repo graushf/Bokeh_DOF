@@ -108,7 +108,7 @@ function drawEffectPass() {
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     gl.viewport(3*gl.viewportWidth/4, 1*gl.viewportHeight/4, gl.viewportWidth/4, gl.viewportHeight/4);
 
-    //renderScrFillTexture(MRTfbData.t[0]);
+    renderScrFillTexture(MRTfbData.t[0]);
 
     gl.viewport(3*gl.viewportWidth/4, 0*gl.viewportHeight/4, gl.viewportWidth/4, gl.viewportHeight/4);
     //renderScrFillTexture(textureSceneBuffer);

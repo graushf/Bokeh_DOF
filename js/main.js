@@ -43,7 +43,12 @@ var CoC = 1.0;
 var Angle = 0.0;
 var aperture = 300.0; // 0.1
 var focalplane = 9.75; // 5.0
-focalplane = 3.95;
+//focalplane = 3.95; // DEFAULT
+//focalplane = 2.450; // GOOD
+focalplane = 2.950; // BAD
+//focalplane = 3.650; // BAD
+//focalplane = 3.95; // BAD
+//focalplane = 4.65; // GOOD
 var focallength = 0.020;
 var CoCScale;
 var CoCBias;

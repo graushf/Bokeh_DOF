@@ -415,7 +415,7 @@
                 
                 _CoC = clamp(_CoC, 0.0, 1.0) * uCoCScaler;
                 scene.rgb *= _CoC;
-                gl_FragColor = vec4(scene, _CoC); // Returns scene colour and CoC as .a channel
+                gl_FragColor = vec4(scene, _CoC * _CoC); // Returns scene colour and CoC as .a channel
                 //gl_FragColor = vec4(_CoC, 0.0, 0.0, 1.0);
             }
         </script>
@@ -521,12 +521,14 @@
                 
                 // Output to MRT
                 //gl_FragData[0] = vec4(color.xyz, coc - color.w);
-                gl_FragData[0] = vec4(color.xyz, coc);
+                float cocBlurred = color.w / coc;
+
+                gl_FragData[0] = vec4(color.xyz, cocBlurred);
                 //gl_FragData[0] = centerColor; 
                 gl_FragData[1] = vec4((color2.rgb + color.xyz), coc);
 
                 if (uDebugCoC == 1.0) {
-                    gl_FragData[0] = vec4(color.w, 0.0, 0.0, 1.0);
+                    gl_FragData[0] = vec4(cocBlurred, 0.0, 0.0, 1.0);
                     gl_FragData[1] = vec4(color2.w, 0.0, 0.0, 1.0);
                 }
             }
@@ -534,9 +536,14 @@
             vec4 BlurTexture(sampler2D tex, vec2 uv, vec2 direction, float centerCoC)
             {
                 //vec4 finalColor = vec4(0.0, 0.0, 0.0, centerCoC); // WORKS OKAY
-                vec4 finalColor = vec4(0.0, 0.0, 0.0, centerCoC);
+                vec4 finalColor = vec4(0.0, 0.0, 0.0, 0.0);
                 float blurAmount = 0.0;
 
+                float originalCoC = 0.0;
+                float color_a = 0.0;
+                float blurAmount3 = 0.0;
+
+                float blurAmount2 = 0.0;
                 // This offset is important. Prevents edge overlaps.
                 uv += direction * 0.5;
                 
@@ -545,13 +552,49 @@
                 {
                     vec4 color = texture2D(tex, uv + direction * float(i));
 
-                    if (length(uInvViewDimensions * color.a * float(NUM_SAMPLES)) > length(direction * float(i))) {
+                    if (length(uInvViewDimensions * sqrt(color.a) * float(NUM_SAMPLES)) > length(direction * float(i))) {
                         //color.xyz *= color.a;
-                        blurAmount += color.a;
+                        blurAmount += sqrt(color.a);
                         //finalColor.xyz += color.xyz; // WORKS OKAY
-                        finalColor.xyz += color.xyz;
-                        //finalColor.a -= color.a;
+                        finalColor.xyz += color.xyz * vec3(1.0, 1.0, 1.0);
+                        //finalColor.a -= color.a;    
+
+                        //color.a = 1.0 - color.a;
+                        
+                        //color_a = (1.0 - color.a) * (1.0 - color.a);
+                        //color.a *= color.a;
+                        //finalColor.a += color_a;
+                        //color_a = color.a * color.a;
+                        //originalCoC += color_a;
+
+                        finalColor.a += color.a;
+                        
+
+                        //finalColor.xyz += vec3(0.0, 0.0, 1.0);
+
+                    } else {
+                        //finalColor.xyz += vec3(1.0, 1.0, 0.0);
+                        color_a = sqrt(color.a);
+                        color_a = (1.0 - color_a) * (1.0 - color_a);
+                        finalColor.a += color_a;
+
+                        //blurAmount2 += (1.0 - sqrt(color.a));
+
+                        //finalColor.a += color.a;
+                        //finalColor.xyz = finalColor.xyz * vec3(1.0, 0.0, 0.0);
+                        //finalColor.a = 0.0;
+                        //blurAmount2 = 1.0 - color.a;
+                        //color_a = (1.0 - color.a) * (1.0 - color.a);
+                        //finalColor.a += color_a;
                     }
+                
+                    //color_a = color.a * color.a;
+                    //originalCoC += color_a;
+                    //blurAmount3 += color.a;
+
+                    blurAmount2 += sqrt(color.a);
+                        
+                    
 
                     //if (length(uInvViewDimensions * color.a * float(NUM_SAMPLES)) > length(uInvViewDimensions * centerCoC)) {
                         //color.xyz *= color.a;
@@ -561,7 +604,19 @@
                     //}
                 }
                 //return vec4((finalColor.xyz / blurAmount), finalColor.w); // WORKS OKAY
-                return (finalColor/blurAmount);
+                float a = finalColor.a/blurAmount;
+                
+
+                float b = originalCoC/blurAmount;
+                b = originalCoC/blurAmount3;
+
+                float c = (1.0 - a) * b;
+
+                float d = finalColor.a/blurAmount2;
+
+                //blurAmount = 1.0;
+                return vec4(finalColor.xyz/blurAmount, d);
+                //return (finalColor/blurAmount);
                 //return vec4((finalColor.xyz/blurAmount), finalColor.a);
             }
         </script>
@@ -599,7 +654,9 @@
                 vec4 color = BlurTexture(uVerticalBlurTexture, vUv, blurDirection, coc) * coc;
                 vec4 color2 = BlurTexture(uDiagonalBlurTexture, vUv, blurDirection2, coc2) * coc2;
 
-                //gl_FragColor = vec4(color.xyz, 1.0); return;
+                //gl_FragColor = vec4(coc, 0.0, 0.0, 1.0); return;
+                //gl_FragColor = vec4(centerColor.xyz, 1.0); return;
+                gl_FragColor = vec4(color.xyz, 1.0); return;
                 //gl_FragColor = vec4(color.rgb, coc); return;
                 vec3 outputCol = (color.rgb + color2.rgb) * 0.5;
 
@@ -643,10 +700,12 @@
 
                     if (length(uInvViewDimensions * color.a * float(NUM_SAMPLES)) > length(direction * float(i))) {
                         //color.xyz *= color.a;
-                        blurAmount += color.a;
+                        blurAmount += sqrt(color.a);
                         //finalColor.xyz += color.xyz; // WORKS OKAY
-                        finalColor += color;
+                        finalColor.xyz += color.xyz;
                         //finalColor.a -= color.a;
+                        finalColor.a += color.a;
+
                     }
 
                     //if (length(uInvViewDimensions * color.a * float(NUM_SAMPLES)) > length(uInvViewDimensions * centerCoC)) {
