@@ -33,13 +33,13 @@ function handleKeys() {
         enableMouse = !enableMouse;
     }
     if (currentlyPressedKeys[82]) {
-		if (CoC < 1.0) {
-			CoC += 0.01;
-		}
+		//if (cocScaler < 1.0) {
+			cocScaler += 0.01;
+		//}
 	}
 	if (currentlyPressedKeys[70]) {
-		if (CoC > 0.01) {
-			CoC -= 0.01;
+		if (cocScaler > 0.01) {
+			cocScaler -= 0.01;
 		}
 	}
 

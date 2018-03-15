@@ -36,7 +36,7 @@ function initStatistics() {
 }
 
 function handleStatistics() {
-    var _CoCValue = CoC;
+    var _CoCValue = cocScaler;
     var _AngleValue = (Angle * 180.0) / Math.PI;
 
     var _ApertureValue = aperture;
