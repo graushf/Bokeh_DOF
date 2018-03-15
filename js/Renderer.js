@@ -64,7 +64,7 @@ function drawEffectPass() {
     //renderDOFCompositionPass(textureRhombiBlurBuffer);
     //renderDOFCompositionPass(textureSceneBuffer);
     //renderScrFillTexture(MRTfbData.t[1]);
-    //renderScrFillTexture(MRTfbData.t[0]);
+    //renderScrFillTexture(MRTfbData.t[0]);    
     renderScrFillTexture(textureRhombiBlurBuffer);
     
     //drawScreenTexture();
