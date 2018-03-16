@@ -2,8 +2,11 @@ var CoCNode, AngleNode;
 var ApertureNode, focalplaneNode, focallengthNode;
 var CoCScaleNode, CoCBiasNode;
 var DepthDebugNode;
+var FPSNode;
 
 function initStatistics() {
+    var FPSElement = document.getElementById("time");
+    
     var CoCElement = document.getElementById("CoCId");
     var AngleElement = document.getElementById("AngleId");
 
@@ -13,6 +16,8 @@ function initStatistics() {
 
     var CoCScaleElement = document.getElementById("CoCScaleId");
     var CoCBiasElement = document.getElementById("CoCBiasId");
+
+    FPSNode = document.createTextNode("");
 
     CoCNode = document.createTextNode("");
     AngleNode = document.createTextNode("");
@@ -33,6 +38,8 @@ function initStatistics() {
 
     CoCScaleElement.appendChild(CoCScaleNode);
     CoCBiasElement.appendChild(CoCBiasNode);
+
+    FPSElement.appendChild(FPSNode);
 }
 
 function handleStatistics() {
@@ -46,6 +53,8 @@ function handleStatistics() {
     var _CoCScaleValue = CoCScale;
     var _CoCBiasValue = CoCBias;
 
+    var _deltaTime = 1000/(deltaTime*100);
+
     CoCNode.nodeValue = _CoCValue.toFixed(2);
     AngleNode.nodeValue = _AngleValue.toFixed(2);
 
@@ -55,4 +64,6 @@ function handleStatistics() {
 
     CoCScaleNode.nodeValue = _CoCScaleValue.toFixed(4);
     CoCBiasNode.nodeValue = _CoCBiasValue.toFixed(4);
+
+    FPSNode.nodeValue = _deltaTime.toFixed(0) + "FPS";
 }

@@ -35,6 +35,9 @@ var textureDepthColorBuffer;
 var depthHalfColorBuffer;
 var textureDepthHalfColorBuffer;
 
+var compositionBlurBuffer;
+var textureCompositionBuffer;
+
 // MRT render targets optimization
 var MRTfbData;
 
@@ -72,6 +75,7 @@ function computeDeltaTime() {
     var currentFrame = new Date().getTime();
     deltaTime = (currentFrame - lastFrame)/100;
     lastFrame = currentFrame;
+    console.log(deltaTime);
 }
 
 
