@@ -41,7 +41,7 @@ function drawEffectPass() {
 
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, MRTfbData.f);
-    gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+    gl.viewport(0, 0, gl.viewportWidth/downsampleCoefficient, gl.viewportHeight/downsampleCoefficient);
 
     var bufferList = [
         ext3.COLOR_ATTACHMENT0_WEBGL,
@@ -52,7 +52,7 @@ function drawEffectPass() {
     drawVerticalAndDiagonalBlurPass(0.0);
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, rhombiBlurBuffer);
-    gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+    gl.viewport(0, 0, gl.viewportWidth/downsampleCoefficient, gl.viewportHeight/downsampleCoefficient);
 
     drawRhombiBlurPassOptimized();
 
@@ -60,12 +60,16 @@ function drawEffectPass() {
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 
+    //gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    //gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
     //renderScrFillTexture(textureRhombiBlurBuffer);
-    //renderDOFCompositionPass(textureRhombiBlurBuffer);
+    renderDOFCompositionPass(textureBackBuffer);
     //renderDOFCompositionPass(textureSceneBuffer);
     //renderScrFillTexture(MRTfbData.t[1]);
     //renderScrFillTexture(MRTfbData.t[0]);    
-    renderScrFillTexture(textureRhombiBlurBuffer);
+    //renderScrFillTexture(textureRhombiBlurBuffer);
+    
     
     //drawScreenTexture();
     //drawScreenFillingGeometry(shaderProgramScrFillTexturePass);
@@ -96,7 +100,7 @@ function drawEffectPass() {
     //renderDOFCompositionPass(textureRhombiBlurBuffer);
     //renderDOFCompositionPass(textureRhombiBlurBuffer);
     gl.bindFramebuffer(gl.FRAMEBUFFER, MRTfbData.f);
-    gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+    gl.viewport(0, 0, gl.viewportWidth/downsampleCoefficient, gl.viewportHeight/downsampleCoefficient);
 
     var bufferList = [
         ext3.COLOR_ATTACHMENT0_WEBGL,
@@ -1273,8 +1277,8 @@ function renderDownsamplePass(enableDebugCoC) {
     //var invViewDimensions_x = 1.0 / 789.0;
     //var invViewDimensions_y = 1.0 / 643.0;
 
-    var invViewDimensionsDownsampleFixed_x = 1.0 / (gl.viewportWidth / downsampleCoefficient);
-    var invViewDimensionsDownsampleFixed_y = 1.0 / (gl.viewportHeight / downsampleCoefficient);
+    var invViewDimensionsDownsampleFixed_x = 1.0 / (gl.viewportWidth);
+    var invViewDimensionsDownsampleFixed_y = 1.0 / (gl.viewportHeight);
 
     gl.uniform2f(shaderProgramDownsamplePass.invViewCoordinatesUniform, invViewDimensionsDownsampleFixed_x, invViewDimensionsDownsampleFixed_y);
 
@@ -1319,7 +1323,7 @@ function drawVerticalAndDiagonalBlurPass(debugCoC) {
     gl.bindBuffer(gl.ARRAY_BUFFER, screenFillingTextureCoordBuffer);
     gl.vertexAttribPointer(shaderProgramVerAndDiagBlurPass.textureCoordAttribute, screenFillingTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-    var _downsampleCoefficient = 1.0;
+    var _downsampleCoefficient = 2.0;
 
     var invViewDimensionsDownsampleFixed_x = 1.0 / (gl.viewportWidth / _downsampleCoefficient);
     var invViewDimensionsDownsampleFixed_y = 1.0 / (gl.viewportHeight / _downsampleCoefficient);
@@ -1334,8 +1338,8 @@ function drawVerticalAndDiagonalBlurPass(debugCoC) {
     gl.uniform1f(shaderProgramVerAndDiagBlurPass.cocScalerUniform, cocScaler);
 
     gl.activeTexture(gl.TEXTURE0);
-    //gl.bindTexture(gl.TEXTURE_2D, textureBackBufferHalf);
-    gl.bindTexture(gl.TEXTURE_2D, textureBackBuffer);
+    gl.bindTexture(gl.TEXTURE_2D, textureBackBufferHalf);
+    //gl.bindTexture(gl.TEXTURE_2D, textureBackBuffer);
     gl.uniform1i(shaderProgramVerAndDiagBlurPass.samplerUniform, 0);
 
     gl.activeTexture(gl.TEXTURE1);
@@ -1373,8 +1377,8 @@ function drawRhombiBlurPassOptimized() {
     //var invViewDimensions_x = 1.0 / 789.0;
     //var invViewDimensions_y = 1.0 / 643.0;
 
-    var invViewDimensionsDownsampleFixed_x = 1.0 / (gl.viewportWidth / 1.0);
-    var invViewDimensionsDownsampleFixed_y = 1.0 / (gl.viewportHeight / 1.0);
+    var invViewDimensionsDownsampleFixed_x = 1.0 / (gl.viewportWidth / 2.0);
+    var invViewDimensionsDownsampleFixed_y = 1.0 / (gl.viewportHeight / 2.0);
 
     gl.uniform2f(shaderProgramRhombiBlurPass.invViewCoordinatesUniform, invViewDimensionsDownsampleFixed_x, invViewDimensionsDownsampleFixed_y);
     gl.uniform1f(shaderProgramRhombiBlurPass.angleUniform, Angle);

@@ -414,7 +414,7 @@
                 }
                 
                 _CoC = clamp(_CoC, 0.0, 1.0) * uCoCScaler;
-                scene.rgb *= _CoC;
+                //scene.rgb *= _CoC;
                 gl_FragColor = vec4(scene, _CoC); // Returns scene colour and CoC as .a channel
                 //gl_FragColor = vec4(_CoC, 0.0, 0.0, 1.0);
             }
@@ -428,6 +428,8 @@
             uniform sampler2D uSampler;
             uniform vec2 uInvViewDimensions;
             uniform int uDebugCoC; 
+
+            uniform float uCoCScaler;
 
             varying vec2 vUv;
 
@@ -463,7 +465,7 @@
                     gl_FragColor = vec4(_CoC, 0.0, 0.0, 1.0); return;
                 }
 
-                gl_FragColor = vec4(colorTotal/1.0, clamp(blurAmount/4.0, 0.0, 1.0) * (PI/2.0));
+                gl_FragColor = vec4(colorTotal/1.0 * _CoC, _CoC);
             }
         </script>
 
@@ -725,18 +727,9 @@
 
             void main(void) {
                 vec4 col = texture2D(uSampler, vUv);
-                //col.a = 1.0;
-                //clamp(col.a, 0.0, 1.0);
-                col.rgb /= col.a > 0.0 ? col.a : 1.0; // catching division by 0
 
-
-                //col.rgb /= col.a;
-
-                //col.rgb = vec3(col.a, 0.0, 0.0);
-                gl_FragColor = vec4(col.rgb, 1.0);
+                gl_FragColor = col;
             }
-
-
         </script>
 
 

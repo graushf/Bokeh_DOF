@@ -65,6 +65,7 @@ function createBackBufferHalf() {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
     textureBackBufferHalf = texture;
 
+    downsampleCoefficient = 1.0;
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.viewportWidth/downsampleCoefficient, gl.viewportHeight/downsampleCoefficient, 0, gl.RGBA, gl.FLOAT, null);
 
     var renderbuffer = gl.createRenderbuffer();
@@ -88,7 +89,8 @@ function createRhombiBlurBuffer() {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
     textureRhombiBlurBuffer = texture;
 
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.viewportWidth/1.0, gl.viewportHeight/1.0, 0, gl.RGBA, gl.FLOAT, null);
+    downsampleCoefficient = 1.0;
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.viewportWidth/downsampleCoefficient, gl.viewportHeight/downsampleCoefficient, 0, gl.RGBA, gl.FLOAT, null);
 
     var renderbuffer = gl.createRenderbuffer();
     gl.bindRenderbuffer(gl.RENDERBUFFER, renderbuffer);

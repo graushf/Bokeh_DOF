@@ -6,8 +6,8 @@ function setupMRT() {
         console.log("MAX_COLOR_ATTACHMENTS_WEBGL: " +gl.getParameter(ext3.MAX_COLOR_ATTACHMENTS_WEBGL));
         console.log("MAX_DRAW_BUFFERS_WEBGL: " + gl.getParameter(ext3.MAX_DRAW_BUFFERS_WEBGL));
 
-        //MRTfbData = create_framebuffer_MRT(gl.viewportWidth/downsampleCoefficient, gl.viewportHeight/downsampleCoefficient);
-        MRTfbData = create_framebuffer_MRT(gl.viewportWidth/1.0, gl.viewportHeight/1.0);
+        MRTfbData = create_framebuffer_MRT(gl.viewportWidth/downsampleCoefficient, gl.viewportHeight/downsampleCoefficient);
+        //MRTfbData = create_framebuffer_MRT(gl.viewportWidth/1.0, gl.viewportHeight/1.0);
     }
 }
 
